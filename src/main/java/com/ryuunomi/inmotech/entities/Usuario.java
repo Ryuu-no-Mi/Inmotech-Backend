@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -54,8 +55,9 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @CreationTimestamp
-    @Column(name = "fecha_registro", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDate fechaRegistro;
+    @Column(name = "fecha_registro")
+    private LocalDateTime fechaRegistro;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agencia")
@@ -86,7 +88,7 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen) {
+    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDateTime fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -157,11 +159,11 @@ public class Usuario {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public LocalDate getFechaRegistro() {
+    public LocalDateTime     getFechaRegistro() {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(LocalDate fechaRegistro) {
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
 

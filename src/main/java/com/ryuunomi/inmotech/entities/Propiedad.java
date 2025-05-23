@@ -43,7 +43,7 @@ public class Propiedad {
     @Column(nullable = false)
     private String titulo;
 
-    @Lob
+    @Column(nullable = false)
     private String descripcion;
 
     @NotNull

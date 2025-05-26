@@ -20,9 +20,9 @@ public class Consulta {
     @JoinColumn(name = "id_propiedad", nullable = false)
     private Propiedad propiedad;
 
+    @Lob
     @Column(nullable = false)
     private String mensaje;
-
 
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();

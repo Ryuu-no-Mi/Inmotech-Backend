@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/propiedad")
+@RequestMapping("/api/property")
 public class PropiedadController {
 
     @Autowired
     private IPropiedadService propiedadService;
 
+    /*
     @GetMapping
     public List<Propiedad> list() {
         return propiedadService.findAll();
@@ -58,22 +59,70 @@ public class PropiedadController {
      * @param idUsuario
      * @return  Retorna una lista de propiedades asociadas al usuario con el ID especificado.
      */
+    /*
+    @GetMapping("/usuario/{idUsuario}")
+    public List<Propiedad> listarPorUsuario(@PathVariable Long idUsuario) {
+        return propiedadService.findByUsuarioId(idUsuario);
+    }
+     */
+
+    /**
+     *
+     * @param
+     * @return Retorna una lista de propiedades asociadas a una agencia con el ID dado.
+     */
+    /*
+    @GetMapping("/agencia/{idAgencia}")
+    public List<Propiedad> listarPorAgencia(@PathVariable Long idAgencia) {
+        return propiedadService.findByAgenciaId(idAgencia);
+    }
+     */
+
+    @GetMapping
+    public List<Propiedad> list() {
+        return propiedadService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> viewById(@PathVariable Long id) {
+        Optional<Propiedad> propiedadOptional = propiedadService.findById(id);
+        if (propiedadOptional.isPresent()) {
+            return ResponseEntity.ok(propiedadOptional.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody Propiedad propiedad) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(propiedadService.save(propiedad));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Propiedad propiedad) {
+        Propiedad updated = propiedadService.update(id, propiedad);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        Optional<Propiedad> deleted = propiedadService.deleteById(id);
+        if (deleted.isPresent()) {
+            return ResponseEntity.ok(deleted.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/usuario/{idUsuario}")
     public List<Propiedad> listarPorUsuario(@PathVariable Long idUsuario) {
         return propiedadService.findByUsuarioId(idUsuario);
     }
 
-    /**
-     *
-     * @param idAgencia
-     * @return Retorna una lista de propiedades asociadas a una agencia con el ID dado.
-     */
     @GetMapping("/agencia/{idAgencia}")
     public List<Propiedad> listarPorAgencia(@PathVariable Long idAgencia) {
         return propiedadService.findByAgenciaId(idAgencia);
     }
-
-
-
 
 }

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,12 +54,11 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @CreationTimestamp
-    @Column(name = "fecha_registro")
-    private LocalDateTime fechaRegistro;
-
+    @Column(name = "fecha_registro", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDate fechaRegistro;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_agencia")
+    @JoinColumn(name = "id_agencia", nullable = true)
     private Agencia agencia;
 
     /**
@@ -88,7 +86,7 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDateTime fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen) {
+    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -159,11 +157,11 @@ public class Usuario {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public LocalDateTime     getFechaRegistro() {
+    public LocalDate getFechaRegistro() {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+    public void setFechaRegistro(LocalDate fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
 
@@ -197,6 +195,14 @@ public class Usuario {
 
     public void setConsultas(List<Consulta> consultas) {
         this.consultas = consultas;
+    }
+
+    public ImagenUsuario getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(ImagenUsuario imagen) {
+        this.imagen = imagen;
     }
 
     @Override

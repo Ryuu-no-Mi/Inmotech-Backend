@@ -18,7 +18,7 @@ public class Agencia {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String nombre;
 
     @NotBlank
@@ -27,12 +27,12 @@ public class Agencia {
     private String descripcion;
 
     @Column(name="id_usuario_admin")
-    private int idUsuarioAdmin;
+    private Long idUsuarioAdmin;
 
     public Agencia() {
     }
 
-    public Agencia(String nombre, String descripcion, int idUsuarioAdmin) {
+    public Agencia(String nombre, String descripcion, Long idUsuarioAdmin) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.idUsuarioAdmin = idUsuarioAdmin;
@@ -54,11 +54,11 @@ public class Agencia {
         this.id = id;
     }
 
-    public int getIdUsuarioAdmin() {
+    public Long getIdUsuarioAdmin() {
         return idUsuarioAdmin;
     }
 
-    public void setIdUsuarioAdmin(int idUsuarioAdmin) {
+    public void setIdUsuarioAdmin(Long idUsuarioAdmin) {
         this.idUsuarioAdmin = idUsuarioAdmin;
     }
 

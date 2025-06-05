@@ -9,30 +9,12 @@ import java.util.Optional;
 
 @Service
 public interface IPropiedadService {
-    /*
-        List<Propiedad> findAll ();
-
-        Optional<Propiedad> findById (Long id);
-
-        Propiedad save (Propiedad propiedad);
-
-        Propiedad update (Long id, Propiedad propiedad);
-
-        void deleteById (Long id);
-
-        void delete (Usuario usuario);
-
-        List<Propiedad> findByUsuarioId (Long idUsuario);
-
-        List<Propiedad> findByAgenciaId (Long idAgencia);
-    }
-     */
-
-
 
         List<Propiedad> findAll();
 
         Optional<Propiedad> findById(Long id);
+
+//        Propiedad findById2( Long id);
 
         Propiedad save(Propiedad propiedad);
 

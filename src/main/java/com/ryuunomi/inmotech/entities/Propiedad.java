@@ -1,9 +1,11 @@
 package com.ryuunomi.inmotech.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -73,18 +75,29 @@ public class Propiedad {
     private Double longitud;
     //
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @CreationTimestamp
     @Column(name = "fecha_publicacion", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaPublicacion;
 
-    @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Transient
+//    private List<ImagenPropiedad> imagenes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "propiedad",
+            cascade = CascadeType.ALL)
+    @OrderBy("orden ASC")              // asegura que la lista venga ordenada por “orden”
+    @JsonIgnoreProperties("propiedad") // ignora la referencia de vuelta al padre
+    @JsonManagedReference
     private List<ImagenPropiedad> imagenes = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "id_imagen_portada")
+    // Relación a la “imagen de portada” (1 a 1)
+    // columna id_imagen_portada en tabla propiedad
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_imagen_portada",
+            nullable = true,
+            foreignKey = @ForeignKey(name = "propiedad_ibfk_3"))
+    @JsonIgnoreProperties("propiedadPortada")
     private ImagenPropiedad imagenPortada;
 
-    //
     // Relación con Usuario (quien publica)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario")
@@ -225,8 +238,16 @@ public class Propiedad {
         this.imagenes = imagenes;
     }
 
+//    public ImagenPropiedad getImagenPortada() {
+//        return imagenPortada;
+//    }
+
+    @Transient
     public ImagenPropiedad getImagenPortada() {
-        return imagenPortada;
+        if (imagenes != null && !imagenes.isEmpty()) {
+            return imagenes.get(0);
+        }
+        return null;
     }
 
     public void setImagenPortada(ImagenPropiedad imagenPortada) {
@@ -274,4 +295,5 @@ public class Propiedad {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
+
 }

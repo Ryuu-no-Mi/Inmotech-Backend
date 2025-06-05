@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface PropiedadRepository extends JpaRepository<Propiedad, Long> {
 
+
     List<Propiedad> findByUsuarioId(Long idUsuario);
 
     List<Propiedad> findByAgenciaId(Long idAgencia);

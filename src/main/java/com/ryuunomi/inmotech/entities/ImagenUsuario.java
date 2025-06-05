@@ -1,5 +1,6 @@
 package com.ryuunomi.inmotech.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,6 +17,7 @@ public class ImagenUsuario {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
+    @JsonIgnore
     private Usuario usuario;
 
     public ImagenUsuario() {}
@@ -60,4 +62,5 @@ public class ImagenUsuario {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
+
 }

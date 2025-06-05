@@ -1,6 +1,7 @@
 package com.ryuunomi.inmotech.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 @Entity
 @Table(name="usuario")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
     @Id
@@ -80,6 +82,7 @@ public class Usuario {
     private List<Consulta> consultas = new ArrayList<>();
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("usuario")
     private ImagenUsuario imagen;
 
 

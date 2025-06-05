@@ -2,16 +2,16 @@ package com.ryuunomi.inmotech.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-
-@Entity
-@Table(name="agencia")
-public class Agencia {
     /**
      *   `id` INT AUTO_INCREMENT PRIMARY KEY,
      *   `nombre` VARCHAR(255) NOT NULL,
      *   `descripcion` TEXT,
      *   `id_usuario_admin` INT
      */
+
+@Entity
+@Table(name="agencia")
+public class Agencia {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

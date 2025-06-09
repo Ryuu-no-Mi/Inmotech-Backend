@@ -3,9 +3,9 @@ package com.ryuunomi.inmotech.services.favorito;
 import com.ryuunomi.inmotech.entities.Favorito;
 import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.entities.Usuario;
-import com.ryuunomi.inmotech.repository.FavoritoRepository;
-import com.ryuunomi.inmotech.repository.PropiedadRepository;
-import com.ryuunomi.inmotech.repository.UsuarioRepository;
+import com.ryuunomi.inmotech.repositories.FavoritoRepository;
+import com.ryuunomi.inmotech.repositories.PropiedadRepository;
+import com.ryuunomi.inmotech.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

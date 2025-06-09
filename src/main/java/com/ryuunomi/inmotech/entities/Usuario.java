@@ -1,6 +1,7 @@
 package com.ryuunomi.inmotech.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import jakarta.persistence.*;
@@ -59,7 +60,7 @@ public class Usuario {
     @Column(name = "fecha_registro", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDate fechaRegistro;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_agencia", nullable = true)
     private Agencia agencia;
 
@@ -79,12 +80,12 @@ public class Usuario {
     private List<Favorito> favoritos = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Consulta> consultas = new ArrayList<>();
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("usuario")
     private ImagenUsuario imagen;
-
 
     public Usuario() {
     }

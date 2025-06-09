@@ -1,7 +1,7 @@
 package com.ryuunomi.inmotech.services.agencia;
 
 import com.ryuunomi.inmotech.entities.Agencia;
-import com.ryuunomi.inmotech.repository.AgenciaRepository;
+import com.ryuunomi.inmotech.repositories.AgenciaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

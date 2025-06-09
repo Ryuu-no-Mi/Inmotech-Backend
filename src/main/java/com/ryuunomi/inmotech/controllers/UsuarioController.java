@@ -1,12 +1,15 @@
 package com.ryuunomi.inmotech.controllers;
 
+import com.ryuunomi.inmotech.dto.UsuarioDTO;
 import com.ryuunomi.inmotech.entities.Usuario;
+import com.ryuunomi.inmotech.mapper.UsuarioMapper;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,53 +31,64 @@ public class UsuarioController {
     @Autowired
     private IUsuarioService usuarioService;
 
-    // 1. Listar todos los usuarios
+    // Listar todos los usuarios
     @GetMapping
-    public ResponseEntity<List<Usuario>> list() {
+    public List<UsuarioDTO> list() {
+        /*
         List<Usuario> usuarios = usuarioService.findAll();
         return ResponseEntity.ok(usuarios);
-    }
+         */
+        List<Usuario> usuarios = usuarioService.findAll();
+        List<UsuarioDTO> dtos = new ArrayList<>();
 
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> list(@PathVariable Long id) {
-        Optional<Usuario> usuario = usuarioService.findById(id);
-        if (usuario.isPresent()) {
-            return ResponseEntity.ok(usuario.get());
+        for (Usuario usuario : usuarios) {
+            dtos.add(UsuarioMapper.toDTO(usuario));
         }
-        return  ResponseEntity.notFound().build();
+
+        return dtos;
     }
 
+    // Listar por id
+    @GetMapping("/{id}")
+    public ResponseEntity<?> listById(@PathVariable Long id) {
+        Optional<Usuario> usuario = usuarioService.findById(id);
+        if (usuario.isEmpty()) {
+            return  ResponseEntity.notFound().build();
+        }
+            return ResponseEntity.ok(UsuarioMapper.toDTO(usuario.get()));
+    }
 
-    // 3. Registro público de usuario (sin autenticación previa)
+    // Registro público de usuario (sin autenticación previa)
     @PostMapping("/register")
-    public ResponseEntity<Usuario> registrar(@RequestBody Usuario nuevo) {
-        Usuario creado = usuarioService.createUser(nuevo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioDTO usuarioDTO) {
+        Usuario usuarioEntidad = UsuarioMapper.fromDTO(usuarioDTO);
+        Usuario usuarioCreado = usuarioService.createUser(usuarioEntidad);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(usuarioCreado));
     }
 
-
-    // 4. Crear usuario (ej. por un admin, crea un agente)
+    // Crear usuario (un admin, crea un agente)
     @PostMapping("/create")
-    public ResponseEntity<Usuario> crear(@RequestBody Usuario nuevo) {
+    public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioDTO usuarioDTO) {
+        Usuario nuevo = UsuarioMapper.fromDTO(usuarioDTO);
         Usuario creado = usuarioService.createUser(nuevo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(creado));
     }
 
-
-    // 5. Actualizar un usuario existente
+    // Actualizar un usuario existente
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(
-            @PathVariable Long id,
-            @RequestBody Usuario cambios) {
-        Usuario actualizado = usuarioService.updateUser(id, cambios);
-        return ResponseEntity.ok(actualizado);
+    public ResponseEntity<UsuarioDTO> update(@PathVariable Long id, @RequestBody UsuarioDTO cambios) {
+        if (usuarioService.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Usuario actualizado = UsuarioMapper.fromDTO(cambios);
+        actualizado.setId(id);
+        Usuario guardado = usuarioService.updateUser(id, actualizado);
+        return ResponseEntity.ok(UsuarioMapper.toDTO(guardado));
     }
 
-
-    // 6. Eliminar un usuario por email
+    // Eliminar un usuario por email
     @DeleteMapping("/email/{email}")
-    public ResponseEntity<Void> eliminarPorEmail(@PathVariable String email) {
+    public ResponseEntity<?> deleteByEmail(@PathVariable String email) {
         if (!usuarioService.existsByEmail(email)) {
             return ResponseEntity.notFound().build();
         }
@@ -82,10 +96,9 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-
-    // 7. Eliminar un usuario por ID
+    // Eliminar un usuario por ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         if (usuarioService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }

@@ -3,7 +3,7 @@ package com.ryuunomi.inmotech.services.usuario;
 import com.ryuunomi.inmotech.entities.ImagenUsuario;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
-import com.ryuunomi.inmotech.repository.UsuarioRepository;
+import com.ryuunomi.inmotech.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

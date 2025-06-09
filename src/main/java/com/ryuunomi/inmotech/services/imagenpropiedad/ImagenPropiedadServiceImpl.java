@@ -3,10 +3,9 @@ package com.ryuunomi.inmotech.services.imagenpropiedad;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
-import com.ryuunomi.inmotech.repository.ImagenPropiedadRepository;
-import com.ryuunomi.inmotech.repository.PropiedadRepository;
+import com.ryuunomi.inmotech.repositories.ImagenPropiedadRepository;
+import com.ryuunomi.inmotech.repositories.PropiedadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -16,11 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {

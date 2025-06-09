@@ -1,4 +1,4 @@
-package com.ryuunomi.inmotech.repository;
+package com.ryuunomi.inmotech.repositories;
 
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import org.springframework.data.jpa.repository.JpaRepository;

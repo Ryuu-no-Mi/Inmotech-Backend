@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IConsultaService {
-    Consulta guardarConsulta(Consulta consulta);
-    Consulta actualizarConsulta(Long id, Consulta consulta);
-    List<Consulta> obtenerTodas();
-    Optional<Consulta> obtenerPorId(Long id);
-    void eliminar(Long id);
-    List<Consulta> obtenerPorUsuario(Long idUsuario);
-    List<Consulta> obtenerPorPropiedad(Long idPropiedad);
+    Consulta save(Consulta consulta);
+    Consulta update(Long id, Consulta consulta);
+    List<Consulta> list();
+    Optional<Consulta> findById(Long id);
+    void delete(Long id);
+    List<Consulta> findByUser(Long idUsuario);
+    List<Consulta> findByProperty(Long idPropiedad);
 
 }

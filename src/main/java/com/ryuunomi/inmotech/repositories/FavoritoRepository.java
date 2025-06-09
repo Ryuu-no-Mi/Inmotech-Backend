@@ -1,4 +1,4 @@
-package com.ryuunomi.inmotech.repository;
+package com.ryuunomi.inmotech.repositories;
 
 import com.ryuunomi.inmotech.entities.Favorito;
 import com.ryuunomi.inmotech.entities.Propiedad;

@@ -1,10 +1,12 @@
 package com.ryuunomi.inmotech.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "favorito")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Favorito {
 
     @Id
@@ -13,10 +15,12 @@ public class Favorito {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_propiedad", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Propiedad propiedad;
 
     @Column(nullable = false)

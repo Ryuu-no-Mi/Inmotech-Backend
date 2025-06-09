@@ -51,7 +51,8 @@ public class UsuarioServiceImpl implements IUsuarioService{
         usuarioExistente.setApellido(usuario.getApellido());
         usuarioExistente.setTelefono(usuario.getTelefono());
         usuarioExistente.setFechaNacimiento(usuario.getFechaNacimiento());
-        // usuarioExistente.setAgencia(usuario.getAgencia());
+        usuarioExistente.setAgencia(usuario.getAgencia());
+        usuarioExistente.setCapacidades(usuario.getCapacidades());
 
         // Gestión de contraseña
         if (!passwordEncoder.matches(usuario.getContrasenia(), usuarioExistente.getContrasenia())) {

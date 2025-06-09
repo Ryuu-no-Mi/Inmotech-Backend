@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -37,40 +38,97 @@ public class AgenciaController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Agencia agencia) {
-        // Necesitamo que hay un admin en la agencia
         Optional<Usuario> optionalUsuario = usuarioService.findById(agencia.getIdUsuarioAdmin());
 
-        if (optionalUsuario.isEmpty()){
+        if (optionalUsuario.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario administrador no encontrado.");
         }
 
         Usuario usuario = optionalUsuario.get();
 
-        // Verifica si el usuario ya tiene rol de admin
-        boolean esAdmin = usuario.getCapacidades().contains(CapacidadUsuario.ADMIN);
+        // ✅ Validar que no tenga ya una agencia distinta asignada
+        System.out.println("Error:" + usuario.getAgencia() + " aaaaaaaaaaaaaa" );
 
-        if (!esAdmin) {
-            usuario.getCapacidades().add(CapacidadUsuario.ADMIN);
-            usuarioService.updateUser(usuario.getId(), usuario); // Asegúrate de que guarda los cambios
+        if (usuario.getAgencia() != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("El usuario ya está asignado a otra agencia.");
         }
 
-        // Comprobar que el usuario tenga rol de admin y sino agregarselo
-        return ResponseEntity.ok(agenciaService.save(agencia));
+        // ✅ Guardar la agencia solo después de validar
+        Agencia agenciaGuardada = agenciaService.save(agencia);
+
+        // Asignar la agencia al usuario
+        usuario.setAgencia(agenciaGuardada);
+
+        if (!usuario.getCapacidades().contains(CapacidadUsuario.ADMIN)) {
+            usuario.getCapacidades().add(CapacidadUsuario.ADMIN);
+        }
+
+        usuarioService.updateUser(usuario.getId(), usuario);
+
+        return ResponseEntity.ok(agenciaGuardada);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Agencia> update(@PathVariable Long id, @RequestBody Agencia agenciaActualizada) {
-        Optional<Agencia> agencia = agenciaService.findById(id);
-        if (agencia.isPresent()) {
-            Agencia a = agencia.get();
-            a.setNombre(agenciaActualizada.getNombre());
-            a.setDescripcion(agenciaActualizada.getDescripcion());
-            a.setIdUsuarioAdmin(agenciaActualizada.getIdUsuarioAdmin());
-            return ResponseEntity.ok(agenciaService.save(a));
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Agencia agenciaActualizada) {
+        Optional<Agencia> agenciaOptional = agenciaService.findById(id);
+
+        if (agenciaOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Agencia no encontrada");
         }
+
+        Agencia agenciaExistente = agenciaOptional.get();
+
+        Optional<Usuario> nuevoAdminOpt = usuarioService.findById(agenciaActualizada.getIdUsuarioAdmin());
+        if (nuevoAdminOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nuevo administrador no encontrado.");
+        }
+
+        Long idAdminAnterior = agenciaExistente.getIdUsuarioAdmin();
+        Long idNuevoAdmin = agenciaActualizada.getIdUsuarioAdmin();
+
+        boolean adminCambiado = !Objects.equals(idAdminAnterior, idNuevoAdmin);
+
+        // CAMBIA EL ADMIIN
+        if (adminCambiado) {
+            Usuario nuevoAdmin = nuevoAdminOpt.get();
+
+            if (nuevoAdmin.getAgencia() != null && !nuevoAdmin.getAgencia().getId().equals(agenciaExistente.getId())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("El usuario ya administra otra agencia.");
+            }
+        }
+
+        // Actualizar y guardar la agencia (después de validar)
+        agenciaExistente.setNombre(agenciaActualizada.getNombre());
+        agenciaExistente.setDescripcion(agenciaActualizada.getDescripcion());
+        agenciaExistente.setIdUsuarioAdmin(idNuevoAdmin);
+        Agencia agenciaGuardada = agenciaService.save(agenciaExistente);
+
+        // Asignar nueva agencia al nuevo admin
+        if (adminCambiado) {
+            Usuario nuevoAdmin = nuevoAdminOpt.get();
+            nuevoAdmin.setAgencia(agenciaGuardada);
+
+            if (!nuevoAdmin.getCapacidades().contains(CapacidadUsuario.ADMIN)) {
+                nuevoAdmin.getCapacidades().add(CapacidadUsuario.ADMIN);
+            }
+
+            usuarioService.updateUser(nuevoAdmin.getId(), nuevoAdmin);
+
+            // Limpiar datos del viejo admin
+            Optional<Usuario> viejoAdminOpt = usuarioService.findById(idAdminAnterior);
+            if (viejoAdminOpt.isPresent()) {
+                Usuario viejoAdmin = viejoAdminOpt.get();
+                viejoAdmin.setAgencia(null);
+                viejoAdmin.getCapacidades().remove(CapacidadUsuario.ADMIN);
+                usuarioService.updateUser(viejoAdmin.getId(), viejoAdmin);
+            }
+        }
+
+        return ResponseEntity.ok(agenciaGuardada);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -81,4 +139,5 @@ public class AgenciaController {
             return ResponseEntity.notFound().build();
         }
     }
+
 }

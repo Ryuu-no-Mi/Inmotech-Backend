@@ -1,5 +1,6 @@
 package com.ryuunomi.inmotech.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ryuunomi.inmotech.enums.EstadoConsulta;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

@@ -28,7 +28,6 @@ import java.util.Set;
 
 @Entity
 @Table(name="usuario")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
 
     @Id
@@ -67,7 +66,6 @@ public class Usuario {
     /**
      * Un Set en Java es una colección que no permite elementos duplicados.
      * - No hay orden garantizado.
-     * - No puede tener elementos repetidos.
      * - Es útil cuando quieres saber si algo existe, no cuántas veces.
      */
     @ElementCollection(fetch = FetchType.EAGER)
@@ -80,11 +78,9 @@ public class Usuario {
     private List<Favorito> favoritos = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Consulta> consultas = new ArrayList<>();
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("usuario")
     private ImagenUsuario imagen;
 
     public Usuario() {

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/property/{propiedadId}/images")
+@RequestMapping("/api/property/{propertyId}/images")
 public class ImagenPropiedadController {
 
     @Autowired

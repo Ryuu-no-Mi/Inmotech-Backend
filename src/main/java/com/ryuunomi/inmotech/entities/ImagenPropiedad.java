@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "imagenes_propiedades")
 public class ImagenPropiedad {
@@ -18,14 +17,11 @@ public class ImagenPropiedad {
     @NotBlank
     private String url;
 
-    private Integer orden; // Orden de la galeria o carrusel
+    private Integer orden;
 
-    // relacion con la tabla ImagenPropiedad
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_propiedad", nullable = false,
             foreignKey = @ForeignKey(name = "imagenes_propiedades_ibfk_1"))
-    @JsonIgnoreProperties("imagenes")          // evita el bucle al serializar
-    @JsonBackReference
     private Propiedad propiedad;
 
     public ImagenPropiedad() {}
@@ -36,13 +32,6 @@ public class ImagenPropiedad {
         this.propiedad = propiedad;
     }
 
-//    public ImagenPropiedad(String url, Integer orden, Long idPropiedad) {
-//        this.url = url;
-//        this.orden = orden;
-//        this.idPropiedad = idPropiedad;
-//    }
-
-    // Getters y setters
     public Long getId() {
         return id;
     }
@@ -75,11 +64,4 @@ public class ImagenPropiedad {
         this.propiedad = propiedad;
     }
 
-//    public Long getIdPropiedad() {
-//        return idPropiedad;
-//    }
-//
-//    public void setIdPropiedad(Long idPropiedad) {
-//        this.idPropiedad = idPropiedad;
-//    }
 }

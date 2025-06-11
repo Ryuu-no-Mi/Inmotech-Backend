@@ -1,6 +1,7 @@
 package com.ryuunomi.inmotech.mapper;
 
 import com.ryuunomi.inmotech.dto.UsuarioDTO;
+import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.ImagenUsuario;
 import com.ryuunomi.inmotech.entities.Usuario;

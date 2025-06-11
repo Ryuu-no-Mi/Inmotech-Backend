@@ -1,21 +1,36 @@
 package com.ryuunomi.inmotech.services.usuario;
 
+import com.ryuunomi.inmotech.dto.UsuarioDTO;
+import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
+import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.ImagenUsuario;
 import com.ryuunomi.inmotech.entities.Usuario;
+import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
+import com.ryuunomi.inmotech.mapper.UsuarioMapper;
+import com.ryuunomi.inmotech.mapper.UsuarioRegistroMapper;
+import com.ryuunomi.inmotech.repositories.AgenciaRepository;
 import com.ryuunomi.inmotech.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServiceImpl implements IUsuarioService{
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AgenciaRepository agenciaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -46,20 +61,42 @@ public class UsuarioServiceImpl implements IUsuarioService{
             throw new IllegalArgumentException("El nuevo email ya está registrado");
         }
 
-        usuarioExistente.setEmail(usuario.getEmail());
-        usuarioExistente.setNombre(usuario.getNombre());
-        usuarioExistente.setApellido(usuario.getApellido());
-        usuarioExistente.setTelefono(usuario.getTelefono());
-        usuarioExistente.setFechaNacimiento(usuario.getFechaNacimiento());
-        usuarioExistente.setAgencia(usuario.getAgencia());
-        usuarioExistente.setCapacidades(usuario.getCapacidades());
-
-        // Gestión de contraseña
-        if (!passwordEncoder.matches(usuario.getContrasenia(), usuarioExistente.getContrasenia())) {
-            usuarioExistente.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
+        if (usuario.getEmail() != null) {
+            usuarioExistente.setEmail(usuario.getEmail());
+        }
+        if (usuario.getNombre() != null) {
+            usuarioExistente.setNombre(usuario.getNombre());
+        }
+        if (usuario.getApellido() != null) {
+            usuarioExistente.setApellido(usuario.getApellido());
+        }
+        if (usuario.getTelefono() != null) {
+            usuarioExistente.setTelefono(usuario.getTelefono());
+        }
+        if (usuario.getFechaNacimiento() != null) {
+            usuarioExistente.setFechaNacimiento(usuario.getFechaNacimiento());
+        }
+        if (usuario.getAgencia() != null) {
+            usuarioExistente.setAgencia(usuario.getAgencia());
         }
 
-        // 6) Actualizar imagen (si viene en la petición)
+        // Actualizar capacidades
+        if (usuario.getCapacidades() != null) {
+            Set<CapacidadUsuario> caps = usuario.getCapacidades().stream()
+                    .collect(Collectors.toSet());
+            usuarioExistente.setCapacidades(caps);
+        }
+
+        // Gestión de contraseña solo si viene en la petición
+        if (usuario.getContrasenia() != null && !usuario.getContrasenia().isBlank()) {
+            String raw = usuario.getContrasenia();
+            System.err.println("Raw password recibido: {}" + raw);
+            String hashed = passwordEncoder.encode(raw);
+            System.err.println("Password codificada: {}" + hashed);
+            usuarioExistente.setContrasenia(hashed);
+        }
+
+        // Actualizar imagen (si viene en la petición)
         if (usuario.getImagen() != null) {
             ImagenUsuario imagenEntrante = usuario.getImagen();
             ImagenUsuario imagenExistente = usuarioExistente.getImagen();
@@ -77,53 +114,73 @@ public class UsuarioServiceImpl implements IUsuarioService{
 
     // verificar que ese email no existe
     @Override
-    public Usuario createUser(Usuario usuario) {
-        if (usuarioRepository.existsByEmail(usuario.getEmail())){
+    public Usuario registerNewUser(UsuarioRegistroDTO usuarioRegistroDTO) {
+        if (usuarioRepository.existsByEmail(usuarioRegistroDTO.email())){
             throw new IllegalArgumentException("Email ya registrado");
         }
-        usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
 
-        if (usuario.getImagen() !=null ){
-            ImagenUsuario imagenUsuario = usuario.getImagen();
-            imagenUsuario.setUsuario(usuario);
-            usuario.setImagen(imagenUsuario);
+        String rawPassword = usuarioRegistroDTO.password(); // ¡VERIFICA ESTA LÍNEA!
+        System.out.println("Contraseña recibida en el servicio: " + rawPassword);
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+           System.err.println("¡Advertencia! La contraseña es nula o vacía antes de codificar.");
         }
 
-        return usuarioRepository.save(usuario);
+        // 3. Codificar la contraseña. Esta es la línea que está fallando.
+        String encodedPassword = passwordEncoder.encode(rawPassword); // Esta es la línea 84 que se menciona en el error
+
+        Usuario nuevoUsuario = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
+        nuevoUsuario.setContrasenia(encodedPassword);
+        //nuevoUsuario.setFechaRegistro(LocalDate.now());
+
+        Set<CapacidadUsuario> capacidadUsuarios = new HashSet<>();
+        capacidadUsuarios.add(CapacidadUsuario.USUARIO);
+        nuevoUsuario.setCapacidades(capacidadUsuarios);
+
+        usuarioRepository.save(nuevoUsuario);
+
+        return nuevoUsuario; // Retorna el usuario creado
     }
 
-    /*
-    @Override
-    public Usuario save(Usuario usuario) {
-        //busco el usuario en la BDD
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuario.getId());
+    // Se crea un usuario  agente o admin
+    public Usuario createUserByAdmin(UsuarioRegistroDTO usuarioRegistroDTO) {
+        if (usuarioRepository.existsByEmail(usuarioRegistroDTO.email())){
+            throw new IllegalArgumentException("Email ya registrado");
+        }
 
-        if (usuarioOptional.isEmpty()) {
-            // Nuevo usuario
-            if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-                throw new IllegalArgumentException("Email ya registrado");
+        String rawPassword = usuarioRegistroDTO.password();
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña para el usuario creado por admin no puede ser nula o vacía.");
+        }
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        Usuario nuevoUsuario = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
+        nuevoUsuario.setContrasenia(encodedPassword);
+        nuevoUsuario.setFechaRegistro(LocalDate.parse(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))));
+
+        // Lógica de asignación de roles basada en idAgencia
+        Set<CapacidadUsuario> roles = new HashSet<>();
+
+        if (usuarioRegistroDTO.idAgencia() != null) {
+            // Si tiene idAgencia, es un AGENTE
+            roles.add(CapacidadUsuario.AGENTE);
+            Optional<Agencia> agencia = agenciaRepository.findById(usuarioRegistroDTO.idAgencia());
+            if (agencia.isEmpty()){
+                throw new ResourceNotFoundException("Error al buscar la agencia");
             }
-            usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
+            nuevoUsuario.setAgencia(agencia.get());
+
         } else {
-            Usuario usuarioExistente = usuarioOptional.get();
-
-            // Verificar si cambió el email
-            if (!usuario.getEmail().equals(usuarioExistente.getEmail()) &&
-                    usuarioRepository.existsByEmail(usuario.getEmail())) {
-                throw new IllegalArgumentException("El nuevo email ya está registrado");
-            }
-
-            // Verificar si cambió la contraseña
-            if (!passwordEncoder.matches(usuario.getContrasenia(), usuarioExistente.getContrasenia())) {
-                usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
-            } else {
-                usuario.setContrasenia(usuarioExistente.getContrasenia());
-            }
+            // Si no tiene idAgencia, el admin podría estar creando otro ADMIN
+            // O podrías tener un campo adicional en el DTO para que el admin especifique el rol.
+            // Por simplicidad, asumamos que si no es agente, es un ADMIN si lo crea un admin.
+            roles.add(CapacidadUsuario.ADMIN);
         }
 
-        return usuarioRepository.save(usuario);
+        nuevoUsuario.setCapacidades(roles);
+
+        usuarioRepository.save(nuevoUsuario);
+        return nuevoUsuario;
     }
-    */
 
     @Override
     public void deleteByEmail(String email) {

@@ -1,5 +1,6 @@
 package com.ryuunomi.inmotech.services.usuario;
 
+import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Usuario;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,9 @@ public interface IUsuarioService {
 
     Usuario updateUser(Long id, Usuario usuario);
 
-    Usuario createUser(Usuario usuario);
+    Usuario registerNewUser(UsuarioRegistroDTO usuarioRegistroDTO);
+
+    Usuario createUserByAdmin(UsuarioRegistroDTO usuarioRegistroDTO);
 
     void deleteByEmail(String email);
 

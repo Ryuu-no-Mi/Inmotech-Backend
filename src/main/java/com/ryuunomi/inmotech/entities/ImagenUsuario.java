@@ -11,13 +11,12 @@ public class ImagenUsuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String url; // o ruta local si no usas almacenamiento en la nube
+    private String url;
 
     private String nombreArchivo;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
-    @JsonIgnore
     private Usuario usuario;
 
     public ImagenUsuario() {}
@@ -27,9 +26,6 @@ public class ImagenUsuario {
         this.nombreArchivo = nombreArchivo;
         this.usuario = usuario;
     }
-
-    // Getters y setters
-
 
     public Long getId() {
         return id;

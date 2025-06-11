@@ -28,10 +28,6 @@ public class Consulta {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
-    /*
-     @Column(nullable = false)
-     private String estado = "pendiente";
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoConsulta estado = EstadoConsulta.PENDIENTE;
@@ -46,7 +42,6 @@ public class Consulta {
         this.estado = estado;
     }
 
-    // Getters y setters
     public Long getId() {
         return id;
     }

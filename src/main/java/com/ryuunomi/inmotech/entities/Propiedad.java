@@ -36,7 +36,6 @@ import java.util.List;
 
 @Entity
 @Table(name="propiedad")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Propiedad {
 
     @Id
@@ -57,7 +56,7 @@ public class Propiedad {
     @NotNull
     @Column(nullable = false)
     private BigDecimal superficie;
-    //
+
     @NotBlank
     @Column(nullable = false)
     private String direccion;
@@ -69,53 +68,40 @@ public class Propiedad {
     @NotBlank
     @Column(nullable = false)
     private String provincia;
-    //
+
     @Column(name = "codigo_postal")
     private String codigoPostal;
-    //
+
     private Double latitud;
     private Double longitud;
-    //
 
     @CreationTimestamp
     @Column(name = "fecha_publicacion", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaPublicacion;
 
-//    @Transient
-//    private List<ImagenPropiedad> imagenes = new ArrayList<>();
-
     @OneToMany(mappedBy = "propiedad",
             cascade = CascadeType.ALL)
-    @OrderBy("orden ASC")              // asegura que la lista venga ordenada por “orden”
-    @JsonIgnoreProperties("propiedad") // ignora la referencia de vuelta al padre
-    @JsonManagedReference
+    @OrderBy("orden ASC")
     private List<ImagenPropiedad> imagenes = new ArrayList<>();
 
-    // Relación a la “imagen de portada” (1 a 1)
-    // columna id_imagen_portada en tabla propiedad
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_imagen_portada",
             nullable = true,
             foreignKey = @ForeignKey(name = "propiedad_ibfk_3"))
-    @JsonIgnoreProperties("propiedadPortada")
     private ImagenPropiedad imagenPortada;
 
-    // Relación con Usuario (quien publica)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    // Relación con Agencia (opcional)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agencia")
     private Agencia agencia;
 
     @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Favorito> favoritos = new ArrayList<>();
 
     @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<Consulta> consultas = new ArrayList<>();
 
 

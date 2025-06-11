@@ -1,21 +1,20 @@
 package com.ryuunomi.inmotech.controllers;
 
 import com.ryuunomi.inmotech.dto.UsuarioDTO;
+import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.mapper.UsuarioMapper;
+import com.ryuunomi.inmotech.mapper.UsuarioRegistroMapper;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-@RestController
-@RequestMapping("/api/user")
-public class UsuarioController {
     /**
      * ¿Que puede hacer un usuario?
      * -- Se puede crear una cuenta con un email
@@ -27,6 +26,11 @@ public class UsuarioController {
      * -- Podra buscar por agencias especificasa tarves de su nombre ???
      * -- Puede eliminar su cuenta
      */
+
+@RestController
+@RequestMapping("/api/user")
+@CrossOrigin(origins = "http://localhost:5173") // dirección del frontend react
+public class UsuarioController {
 
     @Autowired
     private IUsuarioService usuarioService;
@@ -60,30 +64,34 @@ public class UsuarioController {
 
     // Registro público de usuario (sin autenticación previa)
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioDTO usuarioDTO) {
-        Usuario usuarioEntidad = UsuarioMapper.fromDTO(usuarioDTO);
-        Usuario usuarioCreado = usuarioService.createUser(usuarioEntidad);
+    public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+        //Usuario usuarioEntidad = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
+        Usuario usuarioCreado = usuarioService.registerNewUser(usuarioRegistroDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(usuarioCreado));
     }
 
-    // Crear usuario (un admin, crea un agente)
+    // Crear usuario (un admin, crea un agente
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioDTO usuarioDTO) {
-        Usuario nuevo = UsuarioMapper.fromDTO(usuarioDTO);
-        Usuario creado = usuarioService.createUser(nuevo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(creado));
+    public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+        Usuario usuarioCreado = usuarioService.createUserByAdmin(usuarioRegistroDTO); // Asigna roles AGENTE/ADMIN
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(usuarioCreado));
     }
 
     // Actualizar un usuario existente
+    @PreAuthorize("hasAnyRole('USUARIO','ADMIN', 'AGENTE')")
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> update(@PathVariable Long id, @RequestBody UsuarioDTO cambios) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
         if (usuarioService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Usuario actualizado = UsuarioMapper.fromDTO(cambios);
-        actualizado.setId(id);
-        Usuario guardado = usuarioService.updateUser(id, actualizado);
-        return ResponseEntity.ok(UsuarioMapper.toDTO(guardado));
+
+        Usuario entidad = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
+        entidad.setId(id);
+        System.err.println("password codeada::: " + entidad.getContrasenia());
+        Usuario guardado = usuarioService.updateUser(id, entidad);
+        UsuarioDTO responseDto = UsuarioMapper.toDTO(guardado);
+        return ResponseEntity.ok(responseDto);
     }
 
     // Eliminar un usuario por email

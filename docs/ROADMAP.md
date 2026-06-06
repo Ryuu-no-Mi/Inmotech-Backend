@@ -21,13 +21,13 @@
 
 | # | Tarea | Estado |
 |---|---|---|
-| 2.1 | Crear entidad `Suscripcion` (id, usuario, tipo, fechaInicio, fechaFin, stripeId) | PENDIENTE |
-| 2.2 | Crear entidad `Plan` (nombre, maxPropUsuario, maxPropAgencia, precio, stripePriceId) | PENDIENTE |
-| 2.3 | Anadir campos `suscripcion` a `Usuario` y `plan` a `Agencia` | PENDIENTE |
-| 2.4 | Crear `SubscriptionService` con logica de limites | PENDIENTE |
-| 2.5 | Validar limite en `PropiedadController.createProperty()` | PENDIENTE |
-| 2.6 | Endpoint `GET /api/subscription/limits` | PENDIENTE |
-| 2.7 | Error 402 "Payment Required" al exceder limite gratuito | PENDIENTE |
+| 2.1 | Crear entidad `Suscripcion` (id, usuario, tipo, fechaInicio, fechaFin, stripeId) | COMPLETADO |
+| 2.2 | Crear entidad `Plan` (nombre, maxPropUsuario, maxPropAgencia, precio, stripePriceId) | COMPLETADO |
+| 2.3 | Anadir campos `suscripcion` a `Usuario` y `plan` a `Agencia` | COMPLETADO |
+| 2.4 | Crear `SubscriptionService` con logica de limites | COMPLETADO |
+| 2.5 | Validar limite en `PropiedadController.createProperty()` | COMPLETADO |
+| 2.6 | Endpoint `GET /api/subscription/limits` | COMPLETADO |
+| 2.7 | Error 402 "Payment Required" al exceder limite gratuito | COMPLETADO |
 
 ---
 
@@ -120,7 +120,7 @@ Cada rama se mergea via PR (squash merge) a `main`.
 | Fase | Estado |
 |---|---|
 | Fase 1 - Google OAuth | COMPLETADO |
-| Fase 2 - Limites Suscripcion | PENDIENTE |
+| Fase 2 - Limites Suscripcion | COMPLETADO |
 | Fase 3 - Stripe Pagos | PENDIENTE |
 | Fase 4 - Email + Alertas | PENDIENTE |
 | Fase 5 - IA | PENDIENTE |

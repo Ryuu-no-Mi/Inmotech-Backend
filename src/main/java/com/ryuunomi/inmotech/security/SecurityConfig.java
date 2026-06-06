@@ -2,6 +2,8 @@ package com.ryuunomi.inmotech.security;
 
 import com.ryuunomi.inmotech.security.filter.JwtAuthenticationFilter;
 import com.ryuunomi.inmotech.security.filter.JwtValidationFilter;
+import com.ryuunomi.inmotech.security.oauth2.CustomOAuth2UserService;
+import com.ryuunomi.inmotech.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,9 +35,55 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+        private final CustomOAuth2UserService customOAuth2UserService;
+        private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+
+        public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
+                              OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler) {
+            this.customOAuth2UserService = customOAuth2UserService;
+            this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        }
+
         @Bean
         AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
             return config.getAuthenticationManager();
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
+            return http
+                    .csrf(csrf -> csrf.disable())
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .authorizeHttpRequests(authz -> authz
+                            .requestMatchers("/oauth2/**", "/login/**").permitAll()
+                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
+                            .requestMatchers( "/api/user", "/api/user/**").permitAll()
+                            .requestMatchers( "/api/favourite", "/api/favourite/**").permitAll()
+                            .requestMatchers("/api/property/**", "/api/agency/**", "/api/imageProperty/**", "/api/imageUser/**").permitAll()
+                            .requestMatchers("/imagenesPropiedades/**").permitAll()
+                            .requestMatchers("/imagenesUsuarios/**").permitAll()
+                            .requestMatchers("/imagenes/**").permitAll()
+                            .requestMatchers("/api/auth/login")
+                            .hasAnyRole("USUARIO", "AGENTE", "ADMIN")
+
+                    )
+                    .oauth2Login(oauth2 -> oauth2
+                            .userInfoEndpoint(userInfo -> userInfo
+                                    .userService(customOAuth2UserService)
+                            )
+                            .successHandler(oAuth2SuccessHandler)
+                    )
+                    // Filtros JWT: autenticacion primero, luego validacion
+                    .addFilter(new JwtAuthenticationFilter(authManager))
+                    .addFilterBefore(new JwtValidationFilter(), UsernamePasswordAuthenticationFilter.class)
+                    .build();
         }
 
         @Bean

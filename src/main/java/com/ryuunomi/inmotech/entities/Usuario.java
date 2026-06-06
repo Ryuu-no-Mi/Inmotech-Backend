@@ -3,6 +3,7 @@ package com.ryuunomi.inmotech.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ryuunomi.inmotech.enums.AuthProvider;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -34,15 +35,21 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String contrasenia;
 
     private String telefono;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Column(name = "fecha_nacimiento", nullable = false)
+    @Column(name = "fecha_nacimiento", nullable = true)
     private LocalDate fechaNacimiento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(name = "provider_id")
+    private String providerId;
 
     @CreationTimestamp
     @Column(name = "fecha_registro", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -75,7 +82,7 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen) {
+    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen, AuthProvider provider, String providerId) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -88,6 +95,8 @@ public class Usuario {
         this.favoritos = favoritos;
         this.consultas = consultas;
         this.imagen = imagen;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
     public Long getId() {
@@ -192,6 +201,22 @@ public class Usuario {
 
     public void setImagen(ImagenUsuario imagen) {
         this.imagen = imagen;
+    }
+
+    public AuthProvider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(AuthProvider provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     @Override

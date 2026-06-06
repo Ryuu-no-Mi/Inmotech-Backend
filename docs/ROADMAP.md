@@ -8,12 +8,12 @@
 
 | # | Tarea | Estado |
 |---|---|---|
-| 1.1 | Anadir `spring-boot-starter-oauth2-client` al pom.xml | PENDIENTE |
-| 1.2 | Crear entidad `OAuth2Provider` (GOOGLE) y campos `provider` + `providerId` en `Usuario` | PENDIENTE |
-| 1.3 | Modificar `SecurityConfig` con `oauth2Login()` y `OAuth2AuthenticationSuccessHandler` | PENDIENTE |
-| 1.4 | Crear `CustomOAuth2UserService` (busca/registra usuario con datos de Google) | PENDIENTE |
-| 1.5 | Generar JWT propio tras login con Google | PENDIENTE |
-| 1.6 | Externalizar secretos OAuth2 a `application-dev.yml` | PENDIENTE |
+| 1.1 | Anadir `spring-boot-starter-oauth2-client` al pom.xml | COMPLETADO |
+| 1.2 | Crear entidad `OAuth2Provider` (GOOGLE) y campos `provider` + `providerId` en `Usuario` | COMPLETADO |
+| 1.3 | Modificar `SecurityConfig` con `oauth2Login()` y `OAuth2AuthenticationSuccessHandler` | COMPLETADO |
+| 1.4 | Crear `CustomOAuth2UserService` (busca/registra usuario con datos de Google) | COMPLETADO |
+| 1.5 | Generar JWT propio tras login con Google | COMPLETADO |
+| 1.6 | Externalizar secretos OAuth2 a `application-dev.yml` | COMPLETADO |
 
 ---
 
@@ -119,7 +119,7 @@ Cada rama se mergea via PR (squash merge) a `main`.
 
 | Fase | Estado |
 |---|---|
-| Fase 1 - Google OAuth | PENDIENTE |
+| Fase 1 - Google OAuth | COMPLETADO |
 | Fase 2 - Limites Suscripcion | PENDIENTE |
 | Fase 3 - Stripe Pagos | PENDIENTE |
 | Fase 4 - Email + Alertas | PENDIENTE |

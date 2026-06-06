@@ -14,6 +14,22 @@
 - **Hito actual**: Fase 0 completada - Documentacion inicial
 - **Proximo paso**: Iniciar Fase 1 (Google OAuth) - Backend primero
 
+### SESION #002
+- **Fecha**: 2025-06-06
+- **Objetivo**: Fase 1 - Google OAuth (Backend)
+- **Resultado**:
+  - pom.xml: anadido `spring-boot-starter-oauth2-client`
+  - Creado enum `AuthProvider` (LOCAL, GOOGLE)
+  - Modificado `Usuario` con campos `provider`, `providerId`; `contrasenia` y `fechaNacimiento` nullable
+  - `UsuarioRepository` con `findByProviderAndProviderId()`
+  - Creado `CustomOAuth2UserService` (busca/crea usuario desde datos Google)
+  - Creado `OAuth2AuthenticationSuccessHandler` (genera JWT, redirige a frontend)
+  - `SecurityConfig` actualizado con `oauth2Login()`
+  - `application.properties` + `application-dev.yml` configurados
+  - Merge squash a main: `feat/oauth2-google` -> `main` (#1)
+- **Hito actual**: Fase 1 Backend COMPLETADA
+- **Proximo paso**: Fase 1 Frontend (Google OAuth en React)
+
 ---
 
 ## Stack Actual

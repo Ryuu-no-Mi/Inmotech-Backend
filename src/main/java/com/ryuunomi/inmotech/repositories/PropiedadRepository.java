@@ -15,4 +15,8 @@ public interface PropiedadRepository extends JpaRepository<Propiedad, Long> {
 
     List<Propiedad> findByAgenciaId(Long idAgencia);
 
+    long countByUsuarioId(Long idUsuario);
+
+    long countByAgenciaId(Long idAgencia);
+
 }

@@ -79,10 +79,14 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private ImagenUsuario imagen;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_suscripcion")
+    private Suscripcion suscripcion;
+
     public Usuario() {
     }
 
-    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen, AuthProvider provider, String providerId) {
+    public Usuario(String nombre, String apellido, String email, String contrasenia, String telefono, LocalDate fechaNacimiento, LocalDate fechaRegistro, Agencia agencia, Set<CapacidadUsuario> capacidades, List<Favorito> favoritos, List<Consulta> consultas, ImagenUsuario imagen, Suscripcion suscripcion, AuthProvider provider, String providerId) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -95,6 +99,7 @@ public class Usuario {
         this.favoritos = favoritos;
         this.consultas = consultas;
         this.imagen = imagen;
+        this.suscripcion = suscripcion;
         this.provider = provider;
         this.providerId = providerId;
     }
@@ -218,6 +223,9 @@ public class Usuario {
     public void setProviderId(String providerId) {
         this.providerId = providerId;
     }
+
+    public Suscripcion getSuscripcion() { return suscripcion; }
+    public void setSuscripcion(Suscripcion suscripcion) { this.suscripcion = suscripcion; }
 
     @Override
     public String toString() {

@@ -4,8 +4,10 @@ import com.ryuunomi.inmotech.dto.UsuarioDTO;
 import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.ImagenUsuario;
+import com.ryuunomi.inmotech.entities.Suscripcion;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
+import com.ryuunomi.inmotech.enums.TipoSuscripcion;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.mapper.UsuarioMapper;
 import com.ryuunomi.inmotech.mapper.UsuarioRegistroMapper;
@@ -115,6 +117,9 @@ public class UsuarioServiceImpl implements IUsuarioService{
         Set<CapacidadUsuario> capacidadUsuarios = new HashSet<>();
         capacidadUsuarios.add(CapacidadUsuario.USUARIO);
         nuevoUsuario.setCapacidades(capacidadUsuarios);
+
+        Suscripcion suscripcion = new Suscripcion(TipoSuscripcion.GRATIS);
+        nuevoUsuario.setSuscripcion(suscripcion);
 
         usuarioRepository.save(nuevoUsuario);
 

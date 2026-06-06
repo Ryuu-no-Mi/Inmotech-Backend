@@ -29,6 +29,10 @@ public class Agencia {
     @Column(name="id_usuario_admin")
     private Long idUsuarioAdmin;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_plan")
+    private Plan plan;
+
     public Agencia() {
     }
 
@@ -61,6 +65,9 @@ public class Agencia {
     public void setIdUsuarioAdmin(Long idUsuarioAdmin) {
         this.idUsuarioAdmin = idUsuarioAdmin;
     }
+
+    public Plan getPlan() { return plan; }
+    public void setPlan(Plan plan) { this.plan = plan; }
 
     public @NotBlank String getNombre() {
         return nombre;

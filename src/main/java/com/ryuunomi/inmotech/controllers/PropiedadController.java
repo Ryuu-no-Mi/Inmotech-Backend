@@ -12,6 +12,8 @@ import com.ryuunomi.inmotech.mapper.ImagenMapper;
 import com.ryuunomi.inmotech.mapper.PropiedadMapper;
 import com.ryuunomi.inmotech.services.imagenpropiedad.IImagenPropiedadService;
 import com.ryuunomi.inmotech.services.propiedad.IPropiedadService;
+import com.ryuunomi.inmotech.services.suscripcion.ISuscripcionService;
+import com.ryuunomi.inmotech.services.suscripcion.SuscripcionLimitsDTO;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,9 @@ public class PropiedadController {
 
     @Autowired
     private IImagenPropiedadService imagenPropiedadService;
+
+    @Autowired
+    private ISuscripcionService suscripcionService;
 
     // cualquier usuario pued eacceder este o no autenticado
     @GetMapping
@@ -73,8 +79,23 @@ public class PropiedadController {
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@RequestBody PropiedadDTO dto) {
-        //return ResponseEntity.status(HttpStatus.CREATED).body(propiedadService.save(propiedad));
         try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Usuario usuario = usuarioService.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+            if (!suscripcionService.puedePublicar(usuario)) {
+                SuscripcionLimitsDTO limites = suscripcionService.obtenerLimites(usuario);
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                        .body(Map.of(
+                            "error", "Has alcanzado el limite de propiedades de tu plan",
+                            "limite", limites.limiteMaximo(),
+                            "actuales", limites.propiedadesActuales(),
+                            "plan", limites.planNombre(),
+                            "mensaje", "Actualiza tu plan en /planes para publicar mas propiedades"
+                        ));
+            }
+
             Propiedad propiedad = PropiedadMapper.fromDTO(dto);
             Propiedad guardada = propiedadService.save(propiedad);
             return ResponseEntity.status(HttpStatus.CREATED).body(PropiedadMapper.toDTO(guardada));

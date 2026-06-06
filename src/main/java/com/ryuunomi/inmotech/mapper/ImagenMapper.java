@@ -8,7 +8,7 @@ import com.ryuunomi.inmotech.entities.ImagenUsuario;
 public class ImagenMapper {
 
     public static ImagenPropiedadDTO toPropiedadDTO(ImagenPropiedad img) {
-        return new ImagenPropiedadDTO(img.getId(), img.getUrl(), img.getOrden());
+        return new ImagenPropiedadDTO( img.getId(),img.getUrl(), img.getOrden());
     }
 
     public static ImagenUsuarioDTO toUsuarioDTO(ImagenUsuario img) {
@@ -17,7 +17,6 @@ public class ImagenMapper {
 
     public static ImagenPropiedad fromPropiedadDTO(ImagenPropiedadDTO dto) {
         ImagenPropiedad img = new ImagenPropiedad();
-        img.setId(dto.id());
         img.setUrl(dto.url());
         return img;
     }

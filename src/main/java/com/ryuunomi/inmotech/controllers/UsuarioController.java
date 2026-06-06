@@ -3,8 +3,10 @@ package com.ryuunomi.inmotech.controllers;
 import com.ryuunomi.inmotech.dto.UsuarioDTO;
 import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Usuario;
+import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.mapper.UsuarioMapper;
 import com.ryuunomi.inmotech.mapper.UsuarioRegistroMapper;
+import com.ryuunomi.inmotech.security.util.JwtUtils;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,7 +73,7 @@ public class UsuarioController {
     }
 
     // Crear usuario (un admin, crea un agente
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
         Usuario usuarioCreado = usuarioService.createUserByAdmin(usuarioRegistroDTO); // Asigna roles AGENTE/ADMIN
@@ -79,7 +81,7 @@ public class UsuarioController {
     }
 
     // Actualizar un usuario existente
-    @PreAuthorize("hasAnyRole('USUARIO','ADMIN', 'AGENTE')")
+    @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
         if (usuarioService.findById(id).isEmpty()) {
@@ -88,6 +90,7 @@ public class UsuarioController {
 
         Usuario entidad = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
         entidad.setId(id);
+        entidad.setImagen(null);
         System.err.println("password codeada::: " + entidad.getContrasenia());
         Usuario guardado = usuarioService.updateUser(id, entidad);
         UsuarioDTO responseDto = UsuarioMapper.toDTO(guardado);
@@ -112,6 +115,15 @@ public class UsuarioController {
         }
         usuarioService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioDTO> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = JwtUtils.getEmailFromToken(token); // Decodifica el token
+        Usuario usuario = usuarioService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        return ResponseEntity.ok(UsuarioMapper.toDTO(usuario));
     }
 
 }

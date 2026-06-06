@@ -1,7 +1,9 @@
 package com.ryuunomi.inmotech.services.imagenpropiedad;
 
+import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import com.ryuunomi.inmotech.entities.Propiedad;
+import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.repositories.ImagenPropiedadRepository;
 import com.ryuunomi.inmotech.repositories.PropiedadRepository;
@@ -15,16 +17,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
 
-    // Ruta absoluta hacia tu carpeta de recursos donde irán las subcarpetas por propiedad.
     private static final String BASE_DIR =
-            "C:\\Users\\jmonv\\OneDrive\\Escritorio\\Proyecto_inmotech\\Backend-SpringBoot\\"
-                    + "Inmotech-Backend\\src\\main\\resources\\imagenesPropiedades";
+            "C:\\imagenes_inmotech";
 
     @Autowired
     private PropiedadRepository propiedadRepository;
@@ -34,11 +35,10 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
 
     @Override
     public List<ImagenPropiedad> listarPorPropiedad(Long propiedadId) throws ResourceNotFoundException {
-        // 1) Verificar que la Propiedad existe
+
         propiedadRepository.findById(propiedadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con id: " + propiedadId));
 
-        // 2) Devolver lista de imágenes ordenada automáticamente (gracias a @OrderBy en la entidad).
         return imagenPropiedadRepository.findByPropiedadId(propiedadId);
     }
 
@@ -47,7 +47,6 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
     public List<ImagenPropiedad> subirImagenes(Long propiedadId, MultipartFile[] files)
             throws IOException, ResourceNotFoundException, IllegalArgumentException {
 
-        // 1) Verificar propiedad
         Propiedad propiedad = propiedadRepository.findById(propiedadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con id: " + propiedadId));
 
@@ -55,14 +54,26 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
             throw new IllegalArgumentException("Debe proporcionar al menos un archivo en 'files'.");
         }
 
-        // 2) Crear carpeta de la propiedad si no existe:
-        Path carpetaPropiedad = Paths.get(BASE_DIR, propiedadId.toString());
+        Agencia agencia = propiedad.getAgencia();
+        Usuario usuario = propiedad.getUsuario();
+
+        String carpetaPadre;
+
+        if (agencia != null && agencia.getNombre() != null) {
+            carpetaPadre = agencia.getId() + "-" + agencia.getNombre().replaceAll("\\s+", "_");
+        } else if (usuario != null && usuario.getNombre() != null) {
+            carpetaPadre = "user_" + usuario.getId() + "-" + usuario.getNombre().replaceAll("\\s+", "_");
+        } else {
+            carpetaPadre = "user_desconocido";
+        }
+
+        Path carpetaPropiedad = Paths.get(BASE_DIR, carpetaPadre, propiedadId.toString());
         if (!Files.exists(carpetaPropiedad)) {
             Files.createDirectories(carpetaPropiedad);
         }
 
         // 3) Contar cuántas hay actualmente para asignar orden inicial
-        //    Esto evita solaparse si se suben en lotes diferentes.
+        //    Esto evita  si se suben muchas imagenes diferentes.
         List<ImagenPropiedad> existentes = imagenPropiedadRepository.findByPropiedadId(propiedadId);
         int ordenInicial = existentes.size();
 
@@ -70,36 +81,40 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
 
         for (int i = 0; i < files.length; i++) {
             MultipartFile file = files[i];
-            // 3.1) Validaciones básicas
-            if (file.isEmpty()) {
-                continue; // saltar archivos vacíos
-            }
+
+            if (file.isEmpty()) continue;
+
             String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+
             if (originalFilename.contains("..")) {
                 throw new IllegalArgumentException("Nombre de archivo inválido: " + originalFilename);
             }
 
-            // 3.2) Extraer extensión (ej: "jpg", "png", etc.)
             String ext = "";
             int dotIndex = originalFilename.lastIndexOf('.');
             if (dotIndex >= 0) {
                 ext = originalFilename.substring(dotIndex + 1);
             }
 
-            // 3.3) Nombre físico: "<propiedadId>_<ordenActual>.<ext>"
             int ordenActual = ordenInicial + i;
-            String nuevoNombre = propiedadId + "_" + ordenActual +
-                    (ext.isEmpty() ? "" : ("." + ext));
+            String nuevoNombre = propiedadId + "_" + ordenActual + (ext.isEmpty() ? "" : ("." + ext));
 
             Path destino = carpetaPropiedad.resolve(nuevoNombre);
 
-            // 3.4) Guardar el archivo en disco
-            Files.copy(file.getInputStream(), destino);
+            try {
+                Files.copy(file.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException ex) {
+                throw new RuntimeException("No se pudo guardar la imagen: " + originalFilename, ex);
+            }
 
-            // 3.5) Crear entidad y persistir en BD
+            String subCarpeta = carpetaPadre + "/" + propiedadId;
+            String urlGenerada = "/imagenesPropiedades/" + subCarpeta + "/" + nuevoNombre;
+
+            // ✅ Todos los datos ANTES del save
             ImagenPropiedad img = new ImagenPropiedad();
             img.setPropiedad(propiedad);
-            img.setUrl("/imagenesPropiedades/" + propiedadId + "/" + nuevoNombre);
+            img.setUrl(urlGenerada); // 🔥 AQUI ES OBLIGATORIO
+            System.out.println("Guardando imagen con URL: " + img.getUrl());
             img.setOrden(ordenActual);
 
             ImagenPropiedad imgGuardada = imagenPropiedadRepository.save(img);
@@ -114,11 +129,11 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
     public void eliminarImagen(Long propiedadId, Long imageId)
             throws IOException, ResourceNotFoundException, IllegalArgumentException {
 
-        // 1) Verificar propiedad
+
         Propiedad propiedad = propiedadRepository.findById(propiedadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con id: " + propiedadId));
 
-        // 2) Verificar imagen existe y pertenece a esa Propiedad
+
         ImagenPropiedad imagen = imagenPropiedadRepository.findById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada con id: " + imageId));
 
@@ -126,15 +141,13 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
             throw new IllegalArgumentException("La imagen no pertenece a la propiedad indicada.");
         }
 
-        // 3) Borrar archivo físico
-        //    Su url es "/imagenesPropiedades/{propiedadId}/{nombre}", así que extraemos nombre.
+
         String url = imagen.getUrl();
-        // url ejemplo: "/imagenesPropiedades/5/5_0.jpg"
         String nombreArchivo = url.substring(url.lastIndexOf('/') + 1);
         Path rutaArchivo = Paths.get(BASE_DIR, propiedadId.toString(), nombreArchivo);
         Files.deleteIfExists(rutaArchivo);
 
-        // 4) Borrar registro en BD
+
         imagenPropiedadRepository.delete(imagen);
     }
 
@@ -143,11 +156,11 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
     public ImagenPropiedad actualizarOrden(Long propiedadId, Long imageId, Integer nuevoOrden)
             throws ResourceNotFoundException, IllegalArgumentException {
 
-        // 1) Verificar propiedad
+
         Propiedad propiedad = propiedadRepository.findById(propiedadId)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con id: " + propiedadId));
 
-        // 2) Verificar imagen
+
         ImagenPropiedad imagen = imagenPropiedadRepository.findById(imageId)
                 .orElseThrow(() -> new ResourceNotFoundException("Imagen no encontrada con id: " + imageId));
 
@@ -159,8 +172,13 @@ public class ImagenPropiedadServiceImpl implements IImagenPropiedadService {
             throw new IllegalArgumentException("El campo 'orden' no puede ser negativo.");
         }
 
-        // 3) Asignar nuevo orden y guardar
+
         imagen.setOrden(nuevoOrden);
         return imagenPropiedadRepository.save(imagen);
+    }
+
+    @Override
+    public ImagenPropiedad findById(Long id) {
+        return imagenPropiedadRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No se ha encopntardo esta imagen"));
     }
 }

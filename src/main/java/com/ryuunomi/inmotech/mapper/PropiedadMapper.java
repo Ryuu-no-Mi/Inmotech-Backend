@@ -1,14 +1,26 @@
 package com.ryuunomi.inmotech.mapper;
 
+import com.ryuunomi.inmotech.dto.ImagenPropiedadDTO;
 import com.ryuunomi.inmotech.dto.PropiedadDTO;
 import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PropiedadMapper {
 
     public static PropiedadDTO toDTO(Propiedad p) {
+
+        List<ImagenPropiedadDTO> imagenesDTO = p.getImagenes() != null
+                ? p.getImagenes().stream()
+                .map(img -> new ImagenPropiedadDTO(img.getId(),img.getUrl(), img.getOrden()))
+                .toList()
+                : new ArrayList<>();;
+
         return new PropiedadDTO(
                 p.getId(),
                 p.getTitulo(),
@@ -24,7 +36,7 @@ public class PropiedadMapper {
                 p.getFechaPublicacion() != null ? p.getFechaPublicacion().toString() : null,
                 p.getUsuario() != null ? p.getUsuario().getId() : null,
                 p.getAgencia() != null ? p.getAgencia().getId() : null,
-                p.getImagenPortada() != null ? p.getImagenPortada().getUrl() : null
+                imagenesDTO
         );
     }
 
@@ -39,6 +51,9 @@ public class PropiedadMapper {
         p.setCiudad(dto.ciudad());
         p.setProvincia(dto.provincia());
         p.setCodigoPostal(dto.codigoPostal());
+        p.setLatitud(dto.latitud());
+        p.setLongitud(dto.longitud());
+
 
         if (dto.idUsuario() != null) {
             Usuario u = new Usuario();
@@ -52,10 +67,16 @@ public class PropiedadMapper {
             p.setAgencia(a);
         }
 
-        if (dto.imagenPortadaUrl() != null) {
-            ImagenPropiedad img = new ImagenPropiedad();
-            img.setUrl(dto.imagenPortadaUrl());
-            p.setImagenPortada(img);
+        if (dto.imagenes() != null) {
+            List<ImagenPropiedad> imagenes = dto.imagenes().stream()
+                    .map(imgDto -> {
+                        ImagenPropiedad img = new ImagenPropiedad();
+                        img.setUrl(imgDto.url());
+                        img.setOrden(imgDto.orden());
+                        img.setPropiedad(p);
+                        return img;
+                    }).collect(Collectors.toList());
+            p.setImagenes(imagenes);
         }
 
         return p;

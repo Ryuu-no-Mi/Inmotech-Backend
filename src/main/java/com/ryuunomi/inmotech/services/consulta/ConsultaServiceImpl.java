@@ -28,11 +28,11 @@ public class ConsultaServiceImpl implements IConsultaService {
 
     @Override
     public Consulta save(Consulta consulta) {
-        // Cargar entidad Usuario completa
+
         Usuario usuario = usuarioRepository.findById(consulta.getUsuario().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + consulta.getUsuario().getId()));
 
-        // Cargar entidad Propiedad completa
+
         Propiedad propiedad = propiedadRepository.findById(consulta.getPropiedad().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con ID: " + consulta.getPropiedad().getId()));
 

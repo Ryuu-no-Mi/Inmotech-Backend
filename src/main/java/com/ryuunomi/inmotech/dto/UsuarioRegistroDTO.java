@@ -17,7 +17,7 @@ public record UsuarioRegistroDTO(
 
         @NotBlank(message = "La contraseña no puede estar vacía")
         @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres") // Puedes ajustar esto
-        String password, // ¡Aquí está la contraseña!
+        String password,
 
         String telefono,
         String fechaNacimiento,

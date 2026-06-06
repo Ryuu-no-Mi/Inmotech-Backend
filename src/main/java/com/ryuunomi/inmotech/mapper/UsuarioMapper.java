@@ -19,6 +19,7 @@ public class UsuarioMapper {
                 u.getFechaRegistro() != null ? u.getFechaRegistro().toString() : null,
                 u.getAgencia() != null ? u.getAgencia().getId() : null,
                 u.getImagen() != null ? u.getImagen().getUrl() : null
+
         );
     }
 
@@ -31,7 +32,6 @@ public class UsuarioMapper {
         u.setApellido(usuarioDTO.apellido());
         u.setEmail(usuarioDTO.email());
         u.setTelefono(usuarioDTO.telefono());
-        // Conversión de fechas se puede hacer con LocalDate.parse(usuarioDTO.fechaNacimiento()), etc.
 
         if (usuarioDTO.imagenUrl() != null) {
             ImagenUsuario img = new ImagenUsuario();

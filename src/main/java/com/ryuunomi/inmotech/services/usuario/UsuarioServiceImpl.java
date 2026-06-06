@@ -80,14 +80,8 @@ public class UsuarioServiceImpl implements IUsuarioService{
             usuarioExistente.setAgencia(usuario.getAgencia());
         }
 
-        // Actualizar capacidades
-        if (usuario.getCapacidades() != null) {
-            Set<CapacidadUsuario> caps = usuario.getCapacidades().stream()
-                    .collect(Collectors.toSet());
-            usuarioExistente.setCapacidades(caps);
-        }
 
-        // Gestión de contraseña solo si viene en la petición
+        // Gestión de contraseña , si viene
         if (usuario.getContrasenia() != null && !usuario.getContrasenia().isBlank()) {
             String raw = usuario.getContrasenia();
             System.err.println("Raw password recibido: {}" + raw);
@@ -96,18 +90,6 @@ public class UsuarioServiceImpl implements IUsuarioService{
             usuarioExistente.setContrasenia(hashed);
         }
 
-        // Actualizar imagen (si viene en la petición)
-        if (usuario.getImagen() != null) {
-            ImagenUsuario imagenEntrante = usuario.getImagen();
-            ImagenUsuario imagenExistente = usuarioExistente.getImagen();
-            if (imagenExistente != null) {
-                imagenExistente.setUrl(imagenEntrante.getUrl());
-                imagenExistente.setNombreArchivo(imagenEntrante.getNombreArchivo());
-            } else {
-                imagenEntrante.setUsuario(usuarioExistente);
-                usuarioExistente.setImagen(imagenEntrante);
-            }
-        }
 
         return usuarioRepository.save(usuarioExistente);
     }
@@ -125,12 +107,10 @@ public class UsuarioServiceImpl implements IUsuarioService{
            System.err.println("¡Advertencia! La contraseña es nula o vacía antes de codificar.");
         }
 
-        // 3. Codificar la contraseña. Esta es la línea que está fallando.
-        String encodedPassword = passwordEncoder.encode(rawPassword); // Esta es la línea 84 que se menciona en el error
+        String encodedPassword = passwordEncoder.encode(rawPassword);
 
         Usuario nuevoUsuario = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
         nuevoUsuario.setContrasenia(encodedPassword);
-        //nuevoUsuario.setFechaRegistro(LocalDate.now());
 
         Set<CapacidadUsuario> capacidadUsuarios = new HashSet<>();
         capacidadUsuarios.add(CapacidadUsuario.USUARIO);
@@ -141,7 +121,7 @@ public class UsuarioServiceImpl implements IUsuarioService{
         return nuevoUsuario; // Retorna el usuario creado
     }
 
-    // Se crea un usuario  agente o admin
+
     public Usuario createUserByAdmin(UsuarioRegistroDTO usuarioRegistroDTO) {
         if (usuarioRepository.existsByEmail(usuarioRegistroDTO.email())){
             throw new IllegalArgumentException("Email ya registrado");
@@ -170,9 +150,6 @@ public class UsuarioServiceImpl implements IUsuarioService{
             nuevoUsuario.setAgencia(agencia.get());
 
         } else {
-            // Si no tiene idAgencia, el admin podría estar creando otro ADMIN
-            // O podrías tener un campo adicional en el DTO para que el admin especifique el rol.
-            // Por simplicidad, asumamos que si no es agente, es un ADMIN si lo crea un admin.
             roles.add(CapacidadUsuario.ADMIN);
         }
 

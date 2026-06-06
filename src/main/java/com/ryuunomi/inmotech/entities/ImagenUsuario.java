@@ -1,5 +1,6 @@
 package com.ryuunomi.inmotech.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -15,8 +16,8 @@ public class ImagenUsuario {
 
     private String nombreArchivo;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false, unique = true)
+    @OneToOne
+    @JoinColumn(name = "id_usuario", unique = true)
     private Usuario usuario;
 
     public ImagenUsuario() {}

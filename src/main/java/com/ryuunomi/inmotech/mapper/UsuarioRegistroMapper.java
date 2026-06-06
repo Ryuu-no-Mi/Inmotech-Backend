@@ -35,12 +35,16 @@ public class UsuarioRegistroMapper {
             }
         }
 
-        if (usuarioRegistroDTO.imagenUrl() != null && !usuarioRegistroDTO.imagenUrl().isBlank()) {
+        if (usuarioRegistroDTO.imagenUrl() != null &&
+                !usuarioRegistroDTO.imagenUrl().isBlank() &&
+                !usuarioRegistroDTO.imagenUrl().equalsIgnoreCase("null")) {
+
             ImagenUsuario img = new ImagenUsuario();
             img.setUrl(usuarioRegistroDTO.imagenUrl());
             img.setUsuario(u);
             u.setImagen(img);
         }
+
 
         if (usuarioRegistroDTO.idAgencia() != null) {
             Agencia agencia = new Agencia();

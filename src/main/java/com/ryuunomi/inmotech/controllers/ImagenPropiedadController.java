@@ -2,9 +2,11 @@ package com.ryuunomi.inmotech.controllers;
 
 import com.ryuunomi.inmotech.dto.ImagenPropiedadDTO;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
+import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.mapper.ImagenMapper;
 import com.ryuunomi.inmotech.services.imagenpropiedad.IImagenPropiedadService;
+import com.ryuunomi.inmotech.services.propiedad.IPropiedadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/property/{propertyId}/images")
+@RequestMapping("/api/imageProperty")
 public class ImagenPropiedadController {
 
     @Autowired
     private IImagenPropiedadService imagenService;
+
+    @Autowired
+    private IPropiedadService propiedadService;
+
 
     // GET /api/property/{propiedadId}/images
     @GetMapping
@@ -38,8 +44,8 @@ public class ImagenPropiedadController {
         }
     }
 
-    // POST /api/property/{propiedadId}/images
-    @PostMapping
+    // POST /api/property/{propiedadId}
+    @PostMapping("/{propiedadId}")
     public ResponseEntity<?> subir(
             @PathVariable Long propiedadId,
             @RequestParam("files") MultipartFile[] files) {
@@ -60,6 +66,8 @@ public class ImagenPropiedadController {
                     .body("Error al guardar archivos: " + ex.getMessage());
         }
     }
+
+
 
     // DELETE /api/property/{propiedadId}/images/{imageId}
     @DeleteMapping("/{imageId}")
@@ -101,4 +109,21 @@ public class ImagenPropiedadController {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
+
+    @PutMapping("/{id}/portada")
+    public ResponseEntity<?> actualizarPortada(
+            @PathVariable Long id,
+            @RequestParam("imagenId") Long imagenId) {
+
+        Propiedad propiedad = propiedadService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada"));
+
+        ImagenPropiedad imagen = imagenService.findById(imagenId);
+
+        propiedad.setImagenPortada(imagen);
+        propiedadService.save(propiedad);
+
+        return ResponseEntity.ok("Imagen de portada actualizada");
+    }
+
 }

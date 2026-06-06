@@ -4,6 +4,7 @@ import com.ryuunomi.inmotech.dto.FavoritoDTO;
 import com.ryuunomi.inmotech.entities.Favorito;
 import com.ryuunomi.inmotech.mapper.FavoritoMapper;
 import com.ryuunomi.inmotech.services.favorito.IFavoritoService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,7 @@ public class FavoritoController {
     }
 
     @DeleteMapping("/{userId}/{propertyId}")
+    @Transactional
     public ResponseEntity<Void> delete(
             @PathVariable Long userId,
             @PathVariable Long propertyId) {

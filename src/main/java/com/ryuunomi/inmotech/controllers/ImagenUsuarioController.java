@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/user/{userId}/image")
+@RequestMapping("/api/imageUser")
 public class ImagenUsuarioController {
 
     @Autowired
@@ -29,20 +29,31 @@ public class ImagenUsuarioController {
         }
     }
 
-    @PostMapping
+    @PostMapping("{userId}")
     public ResponseEntity<?> upload(
             @PathVariable Long userId,
             @RequestParam("file") MultipartFile file) {
         try {
+            System.out.println("Recibiendo imagen para el usuario ID: " + userId);
+            System.out.println("Nombre archivo: " + file.getOriginalFilename());
             ImagenUsuario creada = imagenService.subirImagen(userId, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(ImagenMapper.toUsuarioDTO(creada));
         } catch (ResourceNotFoundException ex) {
+            System.err.println("Resource not found: " + ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         } catch (IOException ex) {
+            System.err.println("IO ERROR al subir imagen: " + ex.getMessage());
+            ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar archivo: " + ex.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error inesperado al subir imagen:");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
+
 
     @DeleteMapping
     public ResponseEntity<?> delete(@PathVariable Long userId) {

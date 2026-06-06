@@ -15,17 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
-     *   id INT AUTO_INCREMENT PRIMARY KEY,
-     *   nombre VARCHAR(255),
-     *   apellido VARCHAR(255),
-     *   email VARCHAR(255) UNIQUE NOT NULL,
-     *   contraseña VARCHAR(255) NOT NULL,
-     *   telefono VARCHAR(255),
-     *   fecha_registro TIMESTAMP DEFAULT NOW(),
-     *   id_agencia INT
-     */
-
 @Entity
 @Table(name="usuario")
 public class Usuario {

@@ -14,7 +14,6 @@ public interface IPropiedadService {
 
         Optional<Propiedad> findById(Long id);
 
-//        Propiedad findById2( Long id);
 
         Propiedad save(Propiedad propiedad);
 

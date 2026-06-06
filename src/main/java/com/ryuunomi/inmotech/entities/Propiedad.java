@@ -79,8 +79,7 @@ public class Propiedad {
     @Column(name = "fecha_publicacion", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaPublicacion;
 
-    @OneToMany(mappedBy = "propiedad",
-            cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "propiedad")
     @OrderBy("orden ASC")
     private List<ImagenPropiedad> imagenes = new ArrayList<>();
 

@@ -1,6 +1,9 @@
 package com.ryuunomi.inmotech.dto;
 
+import com.ryuunomi.inmotech.entities.ImagenPropiedad;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public record PropiedadDTO(
         Long id,
@@ -17,5 +20,6 @@ public record PropiedadDTO(
         String fechaPublicacion,
         Long idUsuario,
         Long idAgencia,
-        String imagenPortadaUrl
+        List<ImagenPropiedadDTO> imagenes
+
 ) {}

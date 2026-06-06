@@ -66,16 +66,7 @@ public class PropiedadServiceImpl implements IPropiedadService {
         return Optional.of(p);
     }
 
-    /**
-     * El JSON de entrada para crear la Propiedad no suele traer URLs de imágenes, sino ficheros multipart
-     * A continuación, llamar a /api/property/{id}/images para subir ficheros multipart.
-     * En cambio, este método save(...) intenta leer propiedad.getImagenes() como si ya hubiese URLs en el JSON. Si el front no incluye esos URLs
-     * Conclusión: No hay “error” en sí, pero la lógica asume que el JSON de creación ya trae objetos ImagenPropiedad con campo url.
-     * Si el flujo real es “primero creo Propiedad, luego subo fotos con MultipartFile”, entonces la parte de if(propiedad.getImagenes()!=null)
-     * quedará inactiva (no persistirá nada), lo cual es correcto, pero hay que asegurarse de que el front siga exactamente ese orden y no envie URLs en la misma petición.
-     * @param propiedad
-     * @return
-     */
+    
     @Override
     public Propiedad save(Propiedad propiedad) {
         //Verificar que hay un usuario o idUsuario
@@ -88,17 +79,17 @@ public class PropiedadServiceImpl implements IPropiedadService {
             throw new IllegalArgumentException("El usuario especificado no existe");
         }
 
-        //Validando si existe la agencia
+
         if (propiedad.getAgencia() != null &&
                 propiedad.getAgencia().getId() != null &&
                 !agenciaRepository.existsById(propiedad.getAgencia().getId())) {
             throw new IllegalArgumentException("La agencia especificada no existe");
         }
 
-        // Guardar la propiedad; Hibernate asigna el ID
+
         Propiedad propGuardada = propiedadRepository.save(propiedad);
 
-        //4) Si vienen imágenes en el JSON, persístelas con el FK correcto
+
         List<ImagenPropiedad> nuevasImagenes = new ArrayList<>();
 
         if (propiedad.getImagenes() != null) {
@@ -113,7 +104,7 @@ public class PropiedadServiceImpl implements IPropiedadService {
 
         propGuardada.setImagenes(nuevasImagenes);
 
-        // 5) Fijar la portada como la primera (orden = 0), si existe
+
         if (!nuevasImagenes.isEmpty()) {
             propGuardada.setImagenPortada(nuevasImagenes.get(0));
         }
@@ -127,7 +118,6 @@ public class PropiedadServiceImpl implements IPropiedadService {
         Propiedad existente = propiedadRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada"));
 
-        // 1) Actualizar datos básicos
         existente.setTitulo(propiedad.getTitulo());
         existente.setDescripcion(propiedad.getDescripcion());
         existente.setPrecio(propiedad.getPrecio());
@@ -138,18 +128,13 @@ public class PropiedadServiceImpl implements IPropiedadService {
         existente.setCodigoPostal(propiedad.getCodigoPostal());
         existente.setLatitud(propiedad.getLatitud());
         existente.setLongitud(propiedad.getLongitud());
+        existente.setImagenPortada(propiedad.getImagenPortada());
+
         //existente.setUsuario(propiedad.getUsuario());
         //existente.setAgencia(propiedad.getAgencia());
 
-        // 2) Actualizar usuario -- por ahora no se puede, cuando hay una agencia su admin podra actualizar su id
-//        if (propiedad.getUsuario() != null && propiedad.getUsuario().getId() != null) {
-//            if (!usuarioRepository.existsById(propiedad.getUsuario().getId())) {
-//                throw new IllegalArgumentException("El usuario especificado no existe");
-//            }
-//            existente.setUsuario(propiedad.getUsuario());
-//        }
 
-        // 3) Actualizar agencia
+        // Actualizar agencia
         if (propiedad.getAgencia() != null && propiedad.getAgencia().getId() != null) {
             if (!agenciaRepository.existsById(propiedad.getAgencia().getId())) {
                 throw new IllegalArgumentException("La agencia especificada no existe");
@@ -160,7 +145,7 @@ public class PropiedadServiceImpl implements IPropiedadService {
         }
 
 
-        // 5) “Romper” la relación de portada en la BD: poner id_imagen_portada = NULL
+        // poner id_imagen_portada = NULL para poder modificar la bd
         existente.setImagenPortada(null);
         // Con saveAndFlush() forzamos a que Hibernate envíe ya el UPDATE a la base
         propiedadRepository.saveAndFlush(existente);
@@ -169,16 +154,16 @@ public class PropiedadServiceImpl implements IPropiedadService {
         //     SET id_imagen_portada = NULL
         //   WHERE id = :id
 
-        // ——————————————
-        // 6) Borrar todos los registros previos de ImagenPropiedad de esta Propiedad
+
+        // Borrar todos los registros previos de ImagenPropiedad de esta Propiedad
         imagenPropiedadRepository.deleteByPropiedadId(id);
         // equivalente a: DELETE FROM imagenes_propiedades WHERE id_propiedad = :id
 
-        // 7) Limpiamos también la lista en memoria (opcional; por si usamos el getter más adelante)
+        // Limpiamos también la lista en memoria (opcional; por si usamos el getter más adelante)
         existente.getImagenes().clear();
 
-        // ——————————————
-        // 8) Insertar las nuevas imágenes que vienen en el JSON
+
+        // nuevas imágenes que vienen en el JSON
         List<ImagenPropiedad> nuevasImagenes = new ArrayList<>();
         if (propiedad.getImagenes() != null) {
             int orden = 0;
@@ -194,13 +179,10 @@ public class PropiedadServiceImpl implements IPropiedadService {
         }
         existente.setImagenes(nuevasImagenes);
 
-        // ——————————————
-        // 9) Si hay al menos una imagen nueva, la primera (orden=0) la convertimos en portada
         if (!nuevasImagenes.isEmpty()) {
             existente.setImagenPortada(nuevasImagenes.get(0));
         }
 
-        // 10) Guardar y devolver
         return propiedadRepository.save(existente);
     }
 
@@ -219,7 +201,7 @@ public class PropiedadServiceImpl implements IPropiedadService {
         List<Propiedad> propiedades = propiedadRepository.findByUsuarioId(usuario.getId());
         if (!propiedades.isEmpty()) {
             propiedadRepository.deleteAll(propiedades);
-            return Optional.of(propiedades.get(0)); // o cambiar la lógica según necesidad
+            return Optional.of(propiedades.get(0));
         }
         return Optional.empty();
     }

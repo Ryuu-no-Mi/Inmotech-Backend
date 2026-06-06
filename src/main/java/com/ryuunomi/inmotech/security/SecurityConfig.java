@@ -54,8 +54,14 @@ public class SecurityConfig {
                             .requestMatchers("/api/auth/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
                             .requestMatchers( "/api/user", "/api/user/**").permitAll()
-                            .requestMatchers("/api/property/**", "/api/agency/**")
+                            .requestMatchers( "/api/favourite", "/api/favourite/**").permitAll()
+                            .requestMatchers("/api/property/**", "/api/agency/**", "/api/imageProperty/**", "/api/imageUser/**").permitAll()
+                            .requestMatchers("/imagenesPropiedades/**").permitAll()
+                            .requestMatchers("/imagenesUsuarios/**").permitAll()
+                            .requestMatchers("/imagenes/**").permitAll()
+                            .requestMatchers("/api/auth/login")
                             .hasAnyRole("USUARIO", "AGENTE", "ADMIN")
+
                     )
                     // Filtros JWT: autenticación primero, luego validación
                     .addFilter(new JwtAuthenticationFilter(authManager))

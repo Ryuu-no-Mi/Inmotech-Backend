@@ -1,0 +1,61 @@
+package com.ryuunomi.inmotech.services.stripe;
+
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.param.checkout.SessionCreateParams;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class StripeService {
+
+    @Value("${stripe.price.id}")
+    private String priceId;
+
+    @Value("${stripe.api.key}")
+    private String apiKey;
+
+public String crearCheckoutSession(Long userId, String successUrl, String cancelUrl) throws Exception {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("userId", userId.toString());
+
+        SessionCreateParams params = SessionCreateParams.builder()
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+                .setSuccessUrl(successUrl)
+                .setCancelUrl(cancelUrl)
+                .build();
+
+        Session session = Session.create(params);
+        return session.getId();
+    }
+
+    public Event verificarWebhook(String payload, String sigHeader) throws SignatureVerificationException {
+        String webhookSecret = System.getenv("STRIPE_WEBHOOK_SECRET");
+        if (webhookSecret == null || webhookSecret.startsWith("whsec_")) {
+            throw new SignatureVerificationException("Webhook secret no configurado", payload);
+        }
+        return Webhook.constructEvent(payload, sigHeader, webhookSecret);
+    }
+
+    public Long extraerUserIdDeSession(Event event) {
+        try {
+            String json = event.getDataObjectDeserializer().getRawJson();
+            if (json == null) return null;
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(json);
+            com.fasterxml.jackson.databind.JsonNode metaNode = node.get("metadata");
+            if (metaNode != null && metaNode.has("userId")) {
+                return Long.parseLong(metaNode.get("userId").asText());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}

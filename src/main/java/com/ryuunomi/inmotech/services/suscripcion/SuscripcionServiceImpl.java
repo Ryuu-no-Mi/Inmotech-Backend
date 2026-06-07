@@ -6,14 +6,23 @@ import com.ryuunomi.inmotech.entities.Suscripcion;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.enums.TipoSuscripcion;
 import com.ryuunomi.inmotech.repositories.PropiedadRepository;
+import com.ryuunomi.inmotech.repositories.SuscripcionRepository;
+import com.ryuunomi.inmotech.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SuscripcionServiceImpl implements ISuscripcionService {
 
     @Autowired
     private PropiedadRepository propiedadRepository;
+
+    @Autowired
+    private SuscripcionRepository suscripcionRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     public boolean puedePublicar(Usuario usuario) {
@@ -64,5 +73,37 @@ public class SuscripcionServiceImpl implements ISuscripcionService {
         return new SuscripcionLimitsDTO(
             (int) actuales, limite, Math.max(restantes, 0), false, "Gratuito"
         );
+    }
+
+    @Override
+    @Transactional
+    public void activarPremium(Long usuarioId, String stripeSubscriptionId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
+        if (usuario == null) return;
+
+        Suscripcion suscripcion = usuario.getSuscripcion();
+        if (suscripcion == null) {
+            suscripcion = new Suscripcion(TipoSuscripcion.PREMIUM);
+            suscripcion = suscripcionRepository.save(suscripcion);
+            usuario.setSuscripcion(suscripcion);
+        } else {
+            suscripcion.setTipo(TipoSuscripcion.PREMIUM);
+        }
+        suscripcion.setStripeSubscriptionId(stripeSubscriptionId);
+        usuarioRepository.save(usuario);
+        System.out.println("Usuario " + usuarioId + " upgraded to PREMIUM via Stripe");
+    }
+
+    @Override
+    @Transactional
+    public void desactivarPremium(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
+        if (usuario == null || usuario.getSuscripcion() == null) return;
+
+        Suscripcion suscripcion = usuario.getSuscripcion();
+        suscripcion.setTipo(TipoSuscripcion.GRATIS);
+        suscripcion.setStripeSubscriptionId(null);
+        usuarioRepository.save(usuario);
+        System.out.println("Usuario " + usuarioId + " downgraded to FREE");
     }
 }

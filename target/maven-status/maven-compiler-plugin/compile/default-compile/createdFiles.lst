@@ -1,0 +1,16 @@
+com\ryuunomi\inmotech\entities\Plan.class
+com\ryuunomi\inmotech\enums\TipoSuscripcion.class
+com\ryuunomi\inmotech\config\DataSeeder.class
+com\ryuunomi\inmotech\services\suscripcion\SuscripcionLimitsDTO.class
+com\ryuunomi\inmotech\repositories\SuscripcionRepository.class
+com\ryuunomi\inmotech\controllers\SuscripcionController.class
+com\ryuunomi\inmotech\entities\Suscripcion.class
+com\ryuunomi\inmotech\services\stripe\StripeService.class
+com\ryuunomi\inmotech\services\suscripcion\ISuscripcionService.class
+com\ryuunomi\inmotech\security\oauth2\CustomOAuth2UserService.class
+com\ryuunomi\inmotech\repositories\PlanRepository.class
+com\ryuunomi\inmotech\config\stripe\StripeConfig.class
+com\ryuunomi\inmotech\security\oauth2\OAuth2AuthenticationSuccessHandler.class
+com\ryuunomi\inmotech\enums\AuthProvider.class
+com\ryuunomi\inmotech\services\suscripcion\SuscripcionServiceImpl.class
+com\ryuunomi\inmotech\controllers\StripeController.class

@@ -87,37 +87,6 @@ public class SecurityConfig {
         }
 
         @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
-
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
-            return http
-                    .csrf(csrf -> csrf.disable())
-                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                    .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(authz -> authz
-                            //Ruta publica de autentificacion
-                            .requestMatchers("/api/auth/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
-                            .requestMatchers( "/api/user", "/api/user/**").permitAll()
-                            .requestMatchers( "/api/favourite", "/api/favourite/**").permitAll()
-                            .requestMatchers("/api/property/**", "/api/agency/**", "/api/imageProperty/**", "/api/imageUser/**").permitAll()
-                            .requestMatchers("/imagenesPropiedades/**").permitAll()
-                            .requestMatchers("/imagenesUsuarios/**").permitAll()
-                            .requestMatchers("/imagenes/**").permitAll()
-                            .requestMatchers("/api/auth/login")
-                            .hasAnyRole("USUARIO", "AGENTE", "ADMIN")
-
-                    )
-                    // Filtros JWT: autenticación primero, luego validación
-                    .addFilter(new JwtAuthenticationFilter(authManager))
-                    .addFilterBefore(new JwtValidationFilter(), UsernamePasswordAuthenticationFilter.class)
-                    .build();
-        }
-
-        @Bean
         CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOriginPatterns(List.of("*"));

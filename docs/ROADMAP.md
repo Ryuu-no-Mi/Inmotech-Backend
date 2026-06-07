@@ -121,6 +121,7 @@ Cada rama se mergea via PR (squash merge) a `main`.
 |---|---|
 | Fase 1 - Google OAuth | COMPLETADO |
 | Fase 2 - Limites Suscripcion | COMPLETADO |
+| Fase 3 - Stripe Pagos | COMPLETADO |
 | Fase 3 - Stripe Pagos | PENDIENTE |
 | Fase 4 - Email + Alertas | PENDIENTE |
 | Fase 5 - IA | PENDIENTE |

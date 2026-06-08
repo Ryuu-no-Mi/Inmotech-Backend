@@ -14,13 +14,17 @@ import java.util.Map;
 @Service
 public class StripeService {
 
-    @Value("${stripe.price.id}")
+    @Value("${stripe.price.id:price_placeholder}")
     private String priceId;
 
-    @Value("${stripe.api.key}")
+    @Value("${stripe.api.key:}")
     private String apiKey;
 
-public String crearCheckoutSession(Long userId, String successUrl, String cancelUrl) throws Exception {
+    public String crearCheckoutSession(Long userId, String successUrl, String cancelUrl) throws Exception {
+        if (apiKey == null || apiKey.isEmpty() || "sk_test_placeholder".equals(apiKey)) {
+            throw new IllegalStateException("Stripe no esta configurado. Configura STRIPE_API_KEY en variables de entorno.");
+        }
+
         Map<String, String> metadata = new HashMap<>();
         metadata.put("userId", userId.toString());
 

@@ -47,6 +47,9 @@ public class StripeController {
             String sessionId = stripeService.crearCheckoutSession(userId, successUrl, cancelUrl);
             return ResponseEntity.ok(Map.of("sessionId", sessionId));
 
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError()

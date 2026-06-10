@@ -21,7 +21,7 @@ public class StripeService {
     @Value("${stripe.api.key:}")
     private String apiKey;
 
-    public String crearCheckoutSession(Long userId, String successUrl, String cancelUrl) throws Exception {
+    public Session crearCheckoutSession(Long userId, String successUrl, String cancelUrl) throws Exception {
         if (apiKey == null || apiKey.isEmpty() || "sk_test_placeholder".equals(apiKey)) {
             throw new IllegalStateException("Stripe no esta configurado. Configura STRIPE_API_KEY en variables de entorno.");
         }
@@ -47,8 +47,7 @@ public class StripeService {
                 .addLineItem(lineItem)
                 .build();
 
-        Session session = Session.create(params);
-        return session.getId();
+        return Session.create(params);
     }
 
     public Event verificarWebhook(String payload, String sigHeader) throws SignatureVerificationException {

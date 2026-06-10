@@ -44,8 +44,11 @@ public class StripeController {
                 return ResponseEntity.status(401).body("No se pudo identificar al usuario");
             }
 
-            String sessionId = stripeService.crearCheckoutSession(userId, successUrl, cancelUrl);
-            return ResponseEntity.ok(Map.of("sessionId", sessionId));
+            var session = stripeService.crearCheckoutSession(userId, successUrl, cancelUrl);
+            return ResponseEntity.ok(Map.of(
+                "sessionId", session.getId(),
+                "clientSecret", session.getClientSecret()
+            ));
 
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest()

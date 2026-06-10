@@ -45,8 +45,10 @@ public class StripeController {
             }
 
             var session = stripeService.crearCheckoutSession(userId, successUrl, cancelUrl);
+            String checkoutUrl = "https://checkout.stripe.com/pay/" + session.getId();
             var response = new java.util.HashMap<String, Object>();
             response.put("sessionId", session.getId());
+            response.put("checkoutUrl", checkoutUrl);
             if (session.getClientSecret() != null) {
                 response.put("clientSecret", session.getClientSecret());
             }

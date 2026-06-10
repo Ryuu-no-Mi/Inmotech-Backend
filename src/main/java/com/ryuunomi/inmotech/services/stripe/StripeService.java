@@ -50,6 +50,14 @@ public class StripeService {
         return Session.create(params);
     }
 
+    public String getCheckoutUrl(Session session) {
+        String url = session.getUrl();
+        if (url == null || url.isEmpty()) {
+            throw new IllegalStateException("Stripe no proporciono URL de checkout. Verifica la configuracion del producto en Stripe.");
+        }
+        return url;
+    }
+
     public Event verificarWebhook(String payload, String sigHeader) throws SignatureVerificationException {
         String webhookSecret = System.getenv("STRIPE_WEBHOOK_SECRET");
         if (webhookSecret == null || webhookSecret.startsWith("whsec_")) {

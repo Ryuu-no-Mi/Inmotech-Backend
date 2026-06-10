@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,14 +26,25 @@ public class StripeService {
             throw new IllegalStateException("Stripe no esta configurado. Configura STRIPE_API_KEY en variables de entorno.");
         }
 
+        if (priceId == null || priceId.isEmpty() || "price_placeholder".equals(priceId)) {
+            throw new IllegalStateException("Stripe price_id no configurado. Configura STRIPE_PRICE_ID en variables de entorno.");
+        }
+
         Map<String, String> metadata = new HashMap<>();
         metadata.put("userId", userId.toString());
+
+        SessionCreateParams.LineItem lineItem = SessionCreateParams.LineItem.builder()
+                .setPrice(priceId)
+                .setQuantity(1L)
+                .build();
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
+                .putAllMetadata(metadata)
+                .addLineItem(lineItem)
                 .build();
 
         Session session = Session.create(params);

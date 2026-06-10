@@ -45,10 +45,12 @@ public class StripeController {
             }
 
             var session = stripeService.crearCheckoutSession(userId, successUrl, cancelUrl);
-            return ResponseEntity.ok(Map.of(
-                "sessionId", session.getId(),
-                "clientSecret", session.getClientSecret()
-            ));
+            var response = new java.util.HashMap<String, Object>();
+            response.put("sessionId", session.getId());
+            if (session.getClientSecret() != null) {
+                response.put("clientSecret", session.getClientSecret());
+            }
+            return ResponseEntity.ok(response);
 
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest()

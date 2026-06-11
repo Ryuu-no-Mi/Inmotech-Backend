@@ -35,7 +35,14 @@ import java.util.List;
  */
 
 @Entity
-@Table(name="propiedad")
+@Table(name="propiedad", indexes = {
+    @Index(name = "idx_propiedad_ciudad", columnList = "ciudad"),
+    @Index(name = "idx_propiedad_provincia", columnList = "provincia"),
+    @Index(name = "idx_propiedad_precio", columnList = "precio"),
+    @Index(name = "idx_propiedad_superficie", columnList = "superficie"),
+    @Index(name = "idx_propiedad_usuario", columnList = "id_usuario"),
+    @Index(name = "idx_propiedad_fecha", columnList = "fecha_publicacion DESC")
+})
 public class Propiedad {
 
     @Id
@@ -78,6 +85,12 @@ public class Propiedad {
     @CreationTimestamp
     @Column(name = "fecha_publicacion", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaPublicacion;
+
+    @Column(name = "eliminada", nullable = false)
+    private boolean eliminada = false;
+
+    @Column(name = "fecha_eliminacion")
+    private LocalDateTime fechaEliminacion;
 
     @OneToMany(mappedBy = "propiedad")
     @OrderBy("orden ASC")
@@ -217,6 +230,22 @@ public class Propiedad {
 
     public void setFechaPublicacion(LocalDateTime fechaPublicacion) {
         this.fechaPublicacion = fechaPublicacion;
+    }
+
+    public boolean isEliminada() {
+        return eliminada;
+    }
+
+    public void setEliminada(boolean eliminada) {
+        this.eliminada = eliminada;
+    }
+
+    public LocalDateTime getFechaEliminacion() {
+        return fechaEliminacion;
+    }
+
+    public void setFechaEliminacion(LocalDateTime fechaEliminacion) {
+        this.fechaEliminacion = fechaEliminacion;
     }
 
     public List<ImagenPropiedad> getImagenes() {

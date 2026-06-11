@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name="usuario")
+@Table(name="usuario", indexes = {
+    @Index(name = "idx_usuario_email", columnList = "email"),
+    @Index(name = "idx_usuario_suscripcion", columnList = "id_suscripcion"),
+    @Index(name = "idx_usuario_agencia", columnList = "id_agencia")
+})
 public class Usuario {
 
     @Id
@@ -82,6 +86,9 @@ public class Usuario {
     @OneToOne
     @JoinColumn(name = "id_suscripcion")
     private Suscripcion suscripcion;
+
+    @Column(name = "fecha_expiracion_premium")
+    private LocalDate fechaExpiracionPremium;
 
     public Usuario() {
     }
@@ -226,6 +233,9 @@ public class Usuario {
 
     public Suscripcion getSuscripcion() { return suscripcion; }
     public void setSuscripcion(Suscripcion suscripcion) { this.suscripcion = suscripcion; }
+
+    public LocalDate getFechaExpiracionPremium() { return fechaExpiracionPremium; }
+    public void setFechaExpiracionPremium(LocalDate fechaExpiracionPremium) { this.fechaExpiracionPremium = fechaExpiracionPremium; }
 
     @Override
     public String toString() {

@@ -6,7 +6,10 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "suscripcion")
+@Table(name = "suscripcion", indexes = {
+    @Index(name = "idx_suscripcion_tipo", columnList = "tipo"),
+    @Index(name = "idx_suscripcion_fecha_fin", columnList = "fecha_fin")
+})
 public class Suscripcion {
 
     @Id

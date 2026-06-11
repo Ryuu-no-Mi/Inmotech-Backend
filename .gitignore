@@ -1,0 +1,30 @@
+# Configuracion con secretos - NUNCA commitear
+application-dev.yml
+application-mysql.yml
+.env
+*.env
+**/application-secrets.yml
+**/secrets.properties
+**/credentials.yml
+
+# Logs y archivos sensibles
+*.log
+*.pem
+*.key
+
+# Build
+target/
+build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Variables de entorno locales
+.env.local
+.env.*.local

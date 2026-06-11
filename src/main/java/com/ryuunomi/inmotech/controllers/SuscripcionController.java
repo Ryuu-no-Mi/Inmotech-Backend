@@ -36,4 +36,25 @@ public class SuscripcionController {
             return ResponseEntity.status(401).body("Token invalido");
         }
     }
+
+    @PostMapping("/confirmar-premium")
+    public ResponseEntity<?> confirmarPremium(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = JwtUtils.getEmailFromToken(token);
+            Usuario usuario = usuarioService.findByEmail(email).orElse(null);
+
+            if (usuario == null) {
+                return ResponseEntity.status(401).body("Usuario no encontrado");
+            }
+
+            suscripcionService.activarPremium(usuario.getId(), null);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Premium activado correctamente"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(java.util.Map.of("error", "Error al activar premium: " + e.getMessage()));
+        }
+    }
 }

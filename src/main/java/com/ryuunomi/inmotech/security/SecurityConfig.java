@@ -17,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -64,15 +66,20 @@ public class SecurityConfig {
                             .requestMatchers("/oauth2/**", "/login/**").permitAll()
                             .requestMatchers("/api/auth/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
-                            .requestMatchers( "/api/user", "/api/user/**").permitAll()
-                            .requestMatchers( "/api/favourite", "/api/favourite/**").permitAll()
+                            .requestMatchers("/api/user", "/api/user/**").permitAll()
+                            .requestMatchers("/api/favourite", "/api/favourite/**").permitAll()
                             .requestMatchers("/api/property/**", "/api/agency/**", "/api/imageProperty/**", "/api/imageUser/**").permitAll()
                             .requestMatchers("/imagenesPropiedades/**").permitAll()
                             .requestMatchers("/imagenesUsuarios/**").permitAll()
                             .requestMatchers("/imagenes/**").permitAll()
-                            .requestMatchers("/api/auth/login")
-                            .hasAnyRole("USUARIO", "AGENTE", "ADMIN")
-
+                            .requestMatchers("/api/**").authenticated()
+                    )
+                    .exceptionHandling(ex -> ex
+                            .authenticationEntryPoint((request, response, authException) -> {
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"error\": \"No autenticado\", \"message\": \"Requiere token JWT\"}");
+                            })
                     )
                     .oauth2Login(oauth2 -> oauth2
                             .userInfoEndpoint(userInfo -> userInfo

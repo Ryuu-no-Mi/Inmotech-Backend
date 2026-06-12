@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -32,28 +30,21 @@ public class DataSeeder implements CommandLineRunner {
         "Palma de Mallorca", "Las Palmas de Gran Canaria", "Cordoba", "Alicante", "Valladolid",
         "Vigo", "Gijon", "Granada", "Elche", "Oviedo", "Santa Cruz de Tenerife", "Pamplona",
         "Almeria", "San Sebastian", "Burgos", "Santander", "Toledo", "Segovia", "Soria",
-        "Cuenca", "Huesca", "Teruel", "Teruel", "Lleida", "Girona", "Tarragona", "Castellon",
-        "Badajoz", "Caceres", "Merida", "Huelva", "Cadiz", "Sevilla", "Jaen", "Albacete",
-        "Ciudad Real", "Guadalajara", "Salamanca", "Zamora", "Leon", "Palencia", "Aguilar de Campoo",
-        "Pontevedra", "Lugo", "Ourense", "A Coruna", "Santiago de Compostela", "Lugones", "Avila",
-        "Segovia", "Talavera de la Reina", "Aranjuez", "Rivas-Vaciamadrid", "Mostoles", "Alcorcon",
+        "Cuenca", "Huesca", "Teruel", "Lleida", "Girona", "Tarragona", "Castellon",
+        "Badajoz", "Caceres", "Huelva", "Cadiz", "Jaen", "Albacete",
+        "Ciudad Real", "Guadalajara", "Salamanca", "Zamora", "Leon", "Palencia",
+        "Pontevedra", "Lugo", "Ourense", "A Coruna", "Santiago de Compostela", "Avila",
+        "Talavera de la Reina", "Rivas-Vaciamadrid", "Mostoles", "Alcorcon",
         "Getafe", "Fuenlabrada", "Leganes", "Alcobendas", "Torrejon de Ardoz", "Parla",
-        "Alcala de Henares", " Rivas-Vaciamadrid", "Manresa", "Mataro", "Granollers", "Vilanova i la Geltru",
-        "Reus", "Tarragona", "Badalona", "Hospitalet de Llobregat", "Sabadell", "Terrassa",
-        "Málaga", "Marbella", "Estepona", "Torremolinos", "Benalmadena", "Fuengirola", "Velez-Malaga",
-        "Cartagena", "Lorca", "Murcia", "Mazarrón", "Orihuela", "Murcia", "Elche", "Alicante",
-        "Alcoy", "Benidorm", "Torrevieja", "Orihuela", "Granada", "Almeria", "Huelva", "Cadiz",
-        "Jerez de la Frontera", "Algeciras", "San Roque", "Tarifa", "Seville", "Cordoba",
-        "Jaen", "Linares", "Ubeda", "Baeza", "Almagro", "Cuenca", "Guadalajara", "Alcala de Henares",
-        "Toledo", "Talavera de la Reina", "Caceres", "Plasencia", "Navalmoral de la Mata", "Trujillo",
-        "Zamora", "Leon", "Ponferrada", "Astorga", "Benavente", "Salamanca", "Avila", "Segovia",
-        "Soria", "Valladolid", "Palencia", "Burgos", "Miranda de Ebro", "Aranda de Duero",
-        "Logroño", "Haro", "Calahorra", "Huesca", "Barbastro", "Monzon", "Teruel", "Alcazar de San Juan",
-        "Puertollano", "Tomelloso", "Valdepenas", "Alcázar de San Juan", " Villarrobledo",
-        "Motril", "Almeria", "Roquetas de Mar", "El Ejido", "Malaga", "Marbella", "Estepona",
-        "Almeria", "Huelva", "Punta Umbria", "Lepe", "Aljaraque", "Badajoz", "Merida", "Don Benito",
-        "Almendralejo", "Zafra", "Villafranca de los Barros", "Castuera", "Caceres", "Plasencia",
-        "Navalmoral de la Mata", "Trujillo", "Montijo", "Almendralejo", "Don Benito", "Villanueva de la Serena"
+        "Alcala de Henares", "Manresa", "Mataro", "Granollers", "Vilanova i la Geltru",
+        "Reus", "Badalona", "Hospitalet de Llobregat", "Sabadell", "Terrassa",
+        "Marbella", "Estepona", "Torremolinos", "Benalmadena", "Fuengirola", "Velez-Malaga",
+        "Cartagena", "Lorca", "Mazarrón", "Orihuela", "Elche", "Alcoy", "Benidorm", "Torrevieja",
+        "Jerez de la Frontera", "Algeciras", "San Roque", "Linares", "Ubeda", "Baeza",
+        "Merida", "Don Benito", "Almendralejo", "Zafra", "Trujillo", "Montijo",
+        "Plasencia", "Navalmoral de la Mata", "Castuera", "Villafranca de los Barros",
+        "Logroño", "Haro", "Calahorra", "Barbastro", "Monzon", "Calatayud",
+        "Motril", "Roquetas de Mar", "El Ejido", "Punta Umbria", "Lepe", "Aljaraque"
     };
 
     private static final String[] CALLES = {
@@ -61,15 +52,15 @@ public class DataSeeder implements CommandLineRunner {
         "Avenida Diagonal", "Calle Alcala", "Paseo de Recoletos", "Calle Preciados",
         "Avenida America", "Calle Ortega y Gasset", "Calle del Prado", "Paseo de la Vera",
         "Calle del Mar", "Avenida de la Playa", "Calle del Puerto", "Avenida del Puerto",
-        "Calle Real", "Paseo de la Alameda", "Calle Nueva", "Avenida de la Constitución"
+        "Calle Real", "Paseo de la Alameda", "Calle Nueva", "Avenida de la Constitucion"
     };
 
     private static final String[] TIPOS = {"PISO", "CASA", "CHALET", "ATICO", "ESTUDIO", "DUPLEX", "PENTHOUSE", "VILLA"};
 
     private static final String[] AGENCIAS_NOMBRES = {
-        "Inmotech Madrid Centro", "Inmotech Barcelona Costa", "Inmotech Valencia Mediterránea",
-        "Inmotech Andalucía Sur", "Inmotech País Vasco Norte", "Inmotech Galicia Atlántico",
-        "Inmotech Castilla León", "Inmotech Murcia Sureste", "Inmotech Aragón Este", "Inmotech Canarias Global"
+        "Inmotech Madrid Centro", "Inmotech Barcelona Costa", "Inmotech Valencia Mediterranea",
+        "Inmotech Andalucia Sur", "Inmotech Pais Vasco Norte", "Inmotech Galicia Atlantico",
+        "Inmotech Castilla Leon", "Inmotech Murcia Sureste", "Inmotech Aragon Este", "Inmotech Canarias Global"
     };
 
     public DataSeeder(UsuarioRepository usuarioRepository, AgenciaRepository agenciaRepository,
@@ -92,13 +83,21 @@ public class DataSeeder implements CommandLineRunner {
 
         System.out.println("=== DATA SEEDER: Creando datos masivos de prueba ===");
 
-        Plan gratuita = new Plan("Gratuito", 2, 4, BigDecimal.ZERO);
-        gratuita.setStripePriceId("price_gratis");
-        gratuita = planRepository.save(gratuita);
+        Plan gratuito = new Plan("Gratuito", 2, 4, 1, BigDecimal.ZERO);
+        gratuito.setStripePriceId("price_gratis");
+        gratuito = planRepository.save(gratuito);
 
-        Plan premium = new Plan("Premium", Integer.MAX_VALUE, Integer.MAX_VALUE, new BigDecimal("9.99"));
+        Plan premium = new Plan("Premium", Integer.MAX_VALUE, Integer.MAX_VALUE, 1, new BigDecimal("9.99"));
         premium.setStripePriceId("price_premium");
         premium = planRepository.save(premium);
+
+        Plan agenciaBasic = new Plan("Agencia Basic", 20, 50, 5, new BigDecimal("29.99"));
+        agenciaBasic.setStripePriceId("price_agencia_basic");
+        agenciaBasic = planRepository.save(agenciaBasic);
+
+        Plan agenciaPremium = new Plan("Agencia Premium", Integer.MAX_VALUE, Integer.MAX_VALUE, 10, new BigDecimal("49.99"));
+        agenciaPremium.setStripePriceId("price_agencia_premium");
+        agenciaPremium = planRepository.save(agenciaPremium);
 
         Suscripcion suscGratis = new Suscripcion(TipoSuscripcion.GRATIS);
         suscGratis = suscripcionRepository.save(suscGratis);
@@ -124,11 +123,19 @@ public class DataSeeder implements CommandLineRunner {
         int totalPropiedadesCreadas = 0;
 
         for (int a = 0; a < AGENCIAS_NOMBRES.length; a++) {
+            Plan planAgencia = (a < 7) ? agenciaPremium : agenciaBasic;
+            LocalDate expiryPlan = LocalDate.now().plusDays(60 + random.nextInt(180));
+
             Agencia agencia = new Agencia();
             agencia.setNombre(AGENCIAS_NOMBRES[a]);
             agencia.setDescripcion("Agencia inmobiliaria " + AGENCIAS_NOMBRES[a] + " con mas de 10 anos de experiencia en el sector");
-            agencia.setPlan(premium);
+            agencia.setPlan(planAgencia);
+            agencia.setFechaExpiracionPlan(expiryPlan);
             agencia = agenciaRepository.save(agencia);
+
+            Suscripcion agenteSuscripcion = new Suscripcion(TipoSuscripcion.PREMIUM);
+            agenteSuscripcion.setFechaFin(expiryPlan);
+            agenteSuscripcion = suscripcionRepository.save(agenteSuscripcion);
 
             Usuario agente = new Usuario();
             agente.setNombre("Agente" + (a + 1));
@@ -139,8 +146,8 @@ public class DataSeeder implements CommandLineRunner {
             agente.setFechaNacimiento(LocalDate.of(1980 + random.nextInt(15), 1 + random.nextInt(12), 1 + random.nextInt(28)));
             agente.setFechaRegistro(LocalDate.now().minusDays(random.nextInt(365)));
             agente.setAgencia(agencia);
-            agente.setSuscripcion(suscPremium);
-            agente.setFechaExpiracionPremium(LocalDate.now().plusDays(60 + random.nextInt(180)));
+            agente.setSuscripcion(agenteSuscripcion);
+            agente.setFechaExpiracionPremium(expiryPlan);
             agente.setProvider(AuthProvider.LOCAL);
             agente.setCapacidades(Set.of(CapacidadUsuario.AGENTE, CapacidadUsuario.USUARIO));
             agente = usuarioRepository.save(agente);
@@ -150,7 +157,7 @@ public class DataSeeder implements CommandLineRunner {
 
             if ((a + 1) % 2 == 0 || a == AGENCIAS_NOMBRES.length - 1) {
                 long elapsed = System.currentTimeMillis() - startTime;
-                System.out.printf("  Agencies %d/%d creadas | %d propiedades | %dms%n",
+                System.out.printf("  Agencies %d/%d | %d props | %dms%n",
                     a + 1, AGENCIAS_NOMBRES.length, totalPropiedadesCreadas, elapsed);
             }
         }
@@ -159,8 +166,9 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("");
         System.out.println("=== DATA SEEDER: Datos de prueba creados ===");
         System.out.println("Admin: admin@inmotech.com / 123456");
-        System.out.println("10 Agencias con 50 propiedades cada una (VENTA + ALQUILER)");
-        System.out.println("Ciudades: " + CIUDADES.length + " ciudades de España");
+        System.out.println("10 Agencias con plan (7 Premium, 3 Basic)");
+        System.out.println("1 Agente por agencia con suscripcion propia");
+        System.out.println("Ciudades: " + CIUDADES.length + " ciudades de Espana");
         System.out.println("Total propiedades creadas: " + totalPropiedadesCreadas);
         System.out.println("Tiempo total: " + totalTime + "ms");
     }
@@ -217,16 +225,16 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private String getProvincia(String ciudad) {
-        String[] madrid = {"Madrid", "Alcala de Henares", "Fuenlabrada", "Móstoles", "Leganés", "Getafe", "Alcobendas", "Parla"};
-        String[] barcelona = {"Barcelona", "L'Hospitalet", "Badalona", "Sabadell", "Terrassa", "Mataro", "Granollers", "Manresa"};
-        String[] valencia = {"Valencia", "Alicante", "Elche", "Castellón", "Alcoy", "Benidorm", "Orihuela", "Torrevieja"};
-        String[] sevilla = {"Sevilla", "Cadiz", "Jerez de la Frontera", "Algeciras", "Huelva", "Cordoba", "Granada", "Malaga"};
-        String[] bilbao = {"Bilbao", "Vitoria-Gasteiz", "San Sebastian", "Santander", "Burgos", "Logroño", "Pamplona"};
-        String[] galicia = {"A Coruña", "Santiago de Compostela", "Lugo", "Ourense", "Pontevedra", "Vigo", "Lugones", "Gijon"};
+        String[] madrid = {"Madrid", "Alcala de Henares", "Fuenlabrada", "Mostoles", "Leganes", "Getafe", "Alcobendas", "Parla", "Torrejon de Ardoz", "Rivas-Vaciamadrid"};
+        String[] barcelona = {"Barcelona", "L'Hospitalet", "Badalona", "Sabadell", "Terrassa", "Mataro", "Granollers", "Manresa", "Vilanova i la Geltru", "Reus"};
+        String[] valencia = {"Valencia", "Alicante", "Elche", "Castellon", "Alcoy", "Benidorm", "Orihuela", "Torrevieja"};
+        String[] sevilla = {"Sevilla", "Cadiz", "Jerez de la Frontera", "Algeciras", "Huelva", "Cordoba", "Granada", "Malaga", "Marbella", "Estepona"};
+        String[] bilbao = {"Bilbao", "Vitoria-Gasteiz", "San Sebastian", "Santander", "Burgos", "Logroño"};
+        String[] galicia = {"A Coruna", "Santiago de Compostela", "Lugo", "Ourense", "Pontevedra", "Vigo", "Gijon"};
         String[] castillaLe = {"Valladolid", "Leon", "Palencia", "Zamora", "Salamanca", "Segovia", "Avila", "Soria", "Burgos"};
-        String[] murcia = {"Murcia", "Cartagena", "Lorca", "Mazarrón", "Orihuela", "Alcantarilla", "Cieza", "Yecla"};
-        String[] aragon = {"Zaragoza", "Huesca", "Teruel", "Calatayud", "Monzon", "Barbastro", "Alcazar de San Juan"};
-        String[] canarias = {"Las Palmas de Gran Canaria", "Santa Cruz de Tenerife", "San Bartolome de Tirajana", "Adeje", "Granadilla de Abona", "Los Cristianos"};
+        String[] murcia = {"Murcia", "Cartagena", "Lorca", "Mazarrón", "Orihuela"};
+        String[] aragon = {"Zaragoza", "Huesca", "Teruel", "Calatayud", "Barbastro", "Monzon"};
+        String[] canarias = {"Las Palmas de Gran Canaria", "Santa Cruz de Tenerife"};
 
         if (contains(madrid, ciudad)) return "Madrid";
         if (contains(barcelona, ciudad)) return "Barcelona";
@@ -234,9 +242,9 @@ public class DataSeeder implements CommandLineRunner {
         if (contains(sevilla, ciudad)) return "Sevilla";
         if (contains(bilbao, ciudad)) return "Bizkaia";
         if (contains(galicia, ciudad)) return "Galicia";
-        if (contains(castillaLe, ciudad)) return "Castilla y León";
+        if (contains(castillaLe, ciudad)) return "Castilla y Leon";
         if (contains(murcia, ciudad)) return "Murcia";
-        if (contains(aragon, ciudad)) return "Aragón";
+        if (contains(aragon, ciudad)) return "Aragon";
         if (contains(canarias, ciudad)) return "Canarias";
         return ciudad;
     }
@@ -254,9 +262,9 @@ public class DataSeeder implements CommandLineRunner {
             case "Sevilla" -> 41000 + random.nextInt(100);
             case "Bizkaia" -> 48000 + random.nextInt(100);
             case "Galicia" -> 15000 + random.nextInt(100);
-            case "Castilla y León" -> 47000 + random.nextInt(100);
+            case "Castilla y Leon" -> 47000 + random.nextInt(100);
             case "Murcia" -> 30000 + random.nextInt(100);
-            case "Aragón" -> 50000 + random.nextInt(100);
+            case "Aragon" -> 50000 + random.nextInt(100);
             case "Canarias" -> 35000 + random.nextInt(100);
             default -> 28000 + random.nextInt(50000);
         };
@@ -264,10 +272,6 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private double generarLatitud(String ciudad) {
-        double[][] rangos = {
-            {28.0, 44.0},
-            {-18.0, 18.0}
-        };
         if (ciudad.contains("Canaria") || ciudad.contains("Las Palmas") || ciudad.contains("Tenerife")) {
             return 27.0 + random.nextDouble() * 2;
         }

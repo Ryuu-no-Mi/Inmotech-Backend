@@ -47,7 +47,7 @@ public interface PropiedadRepository extends JpaRepository<Propiedad, Long> {
         AND (:superficieMin IS NULL OR p.superficie >= :superficieMin)
         AND (:superficieMax IS NULL OR p.superficie <= :superficieMax)
         AND (:tipo IS NULL OR p.tipo = :tipo)
-        AND (:texto IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', :texto, '%')) OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :texto, '%')))
+        AND (:texto IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', :texto, '%')) OR LOWER(CAST(p.descripcion AS String)) LIKE LOWER(CONCAT('%', :texto, '%')))
         """)
     Page<Propiedad> buscarConFiltros(
         @Param("ciudad") String ciudad,

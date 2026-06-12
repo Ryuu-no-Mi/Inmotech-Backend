@@ -1,7 +1,10 @@
 package com.ryuunomi.inmotech.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ryuunomi.inmotech.dto.BusquedaDTO;
+import com.ryuunomi.inmotech.dto.FacetaDTO;
 import com.ryuunomi.inmotech.dto.ImagenPropiedadDTO;
+import com.ryuunomi.inmotech.dto.PageResponse;
 import com.ryuunomi.inmotech.dto.PropiedadDTO;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import com.ryuunomi.inmotech.entities.Propiedad;
@@ -51,15 +54,47 @@ public class PropiedadController {
 
     // cualquier usuario pued eacceder este o no autenticado
     @GetMapping
-    public List<PropiedadDTO> list() {
-        List<Propiedad> entidades = propiedadService.findAll();
-        List<PropiedadDTO> dtos = new ArrayList<>();
+    public PageResponse<PropiedadDTO> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        org.springframework.data.domain.Page<Propiedad> pageResult =
+            propiedadService.findAllActivas(org.springframework.data.domain.PageRequest.of(page, size));
+        List<PropiedadDTO> dtos = pageResult.getContent().stream()
+            .map(PropiedadMapper::toDTO)
+            .toList();
+        return new PageResponse<>(dtos, pageResult.getNumber(), pageResult.getSize(),
+            pageResult.getTotalElements(), pageResult.getTotalPages(),
+            pageResult.isFirst(), pageResult.isLast());
+    }
 
-        for (Propiedad p : entidades) {
-            dtos.add(PropiedadMapper.toDTO(p));
-        }
+    @GetMapping("/buscar")
+    public PageResponse<PropiedadDTO> buscar(
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String ciudad,
+            @RequestParam(required = false) String provincia,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String precioMin,
+            @RequestParam(required = false) String precioMax,
+            @RequestParam(required = false) String superficieMin,
+            @RequestParam(required = false) String superficieMax,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        BusquedaDTO dto = new BusquedaDTO(texto, ciudad, provincia, tipo, precioMin, precioMax, superficieMin, superficieMax);
+        org.springframework.data.domain.Page<Propiedad> pageResult =
+            propiedadService.buscarConFiltros(dto, org.springframework.data.domain.PageRequest.of(page, size));
+        List<PropiedadDTO> dtos = pageResult.getContent().stream()
+            .map(PropiedadMapper::toDTO)
+            .toList();
+        return new PageResponse<>(dtos, pageResult.getNumber(), pageResult.getSize(),
+            pageResult.getTotalElements(), pageResult.getTotalPages(),
+            pageResult.isFirst(), pageResult.isLast());
+    }
 
-        return dtos;
+    @GetMapping("/facetas")
+    public FacetaDTO facetas() {
+        return propiedadService.getFacetas();
     }
 
 

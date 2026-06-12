@@ -3,6 +3,7 @@ package com.ryuunomi.inmotech.dto;
 import java.io.Serializable;
 
 public record BusquedaDTO(
+    String operacion,
     String texto,
     String ciudad,
     String provincia,

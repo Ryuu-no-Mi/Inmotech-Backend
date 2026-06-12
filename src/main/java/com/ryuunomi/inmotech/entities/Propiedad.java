@@ -79,6 +79,10 @@ public class Propiedad {
     @Column(nullable = false)
     private String tipo;
 
+    @NotBlank
+    @Column(nullable = false)
+    private String operacion;
+
     @Column(name = "codigo_postal")
     private String codigoPostal;
 
@@ -123,7 +127,7 @@ public class Propiedad {
     public Propiedad() {
     }
 
-    public Propiedad(String titulo, String descripcion, BigDecimal precio, BigDecimal superficie, String direccion, String ciudad, String provincia, String codigoPostal, Double latitud, Double longitud, LocalDateTime fechaPublicacion, List<ImagenPropiedad> imagenes, ImagenPropiedad imagenPortada, Usuario usuario, Agencia agencia, List<Favorito> favoritos, List<Consulta> consultas, String tipo) {
+    public Propiedad(String titulo, String descripcion, BigDecimal precio, BigDecimal superficie, String direccion, String ciudad, String provincia, String codigoPostal, Double latitud, Double longitud, LocalDateTime fechaPublicacion, List<ImagenPropiedad> imagenes, ImagenPropiedad imagenPortada, Usuario usuario, Agencia agencia, List<Favorito> favoritos, List<Consulta> consultas, String tipo, String operacion) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -142,6 +146,7 @@ public class Propiedad {
         this.favoritos = favoritos;
         this.consultas = consultas;
         this.tipo = tipo;
+        this.operacion = operacion;
     }
 
     public Long getId() {return id;}
@@ -210,6 +215,14 @@ public class Propiedad {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public String getOperacion() {
+        return operacion;
+    }
+
+    public void setOperacion(String operacion) {
+        this.operacion = operacion;
     }
 
     public String getCodigoPostal() {

@@ -240,21 +240,34 @@ public class PropiedadServiceImpl implements IPropiedadService {
             ? new BigDecimal(dto.superficieMax()) : null;
 
         return propiedadRepository.buscarConFiltros(
-            dto.ciudad(), dto.provincia(), precioMin, precioMax,
+            dto.operacion(), dto.ciudad(), dto.provincia(), precioMin, precioMax,
             superficieMin, superficieMax, dto.tipo(), dto.texto(),
             pageable
         );
     }
 
     @Override
-    public FacetaDTO getFacetas() {
+    public FacetaDTO getFacetas(BusquedaDTO filtros) {
+        BigDecimal precioMin = filtros.precioMin() != null && !filtros.precioMin().isBlank()
+            ? new BigDecimal(filtros.precioMin()) : null;
+        BigDecimal precioMax = filtros.precioMax() != null && !filtros.precioMax().isBlank()
+            ? new BigDecimal(filtros.precioMax()) : null;
+        BigDecimal superficieMin = filtros.superficieMin() != null && !filtros.superficieMin().isBlank()
+            ? new BigDecimal(filtros.superficieMin()) : null;
+        BigDecimal superficieMax = filtros.superficieMax() != null && !filtros.superficieMax().isBlank()
+            ? new BigDecimal(filtros.superficieMax()) : null;
+
         Map<String, Long> ciudades = new HashMap<>();
-        for (Object[] row : propiedadRepository.countByCiudadGrouped()) {
+        for (Object[] row : propiedadRepository.countByCiudadGrouped(
+                filtros.operacion(), filtros.provincia(), precioMin, precioMax,
+                superficieMin, superficieMax, filtros.tipo())) {
             ciudades.put((String) row[0], (Long) row[1]);
         }
 
         Map<String, Long> tipos = new HashMap<>();
-        for (Object[] row : propiedadRepository.countByTipoGrouped()) {
+        for (Object[] row : propiedadRepository.countByTipoGrouped(
+                filtros.operacion(), filtros.provincia(), precioMin, precioMax,
+                superficieMin, superficieMax, filtros.ciudad())) {
             tipos.put((String) row[0], (Long) row[1]);
         }
 

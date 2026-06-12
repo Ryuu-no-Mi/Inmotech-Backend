@@ -220,6 +220,7 @@ public class DataSeeder implements CommandLineRunner {
         p.setFechaPublicacion(LocalDateTime.now().minusDays(random.nextInt(180)));
         p.setUsuario(usuario);
         p.setTipo(tipos[random.nextInt(tipos.length)]);
+        p.setOperacion(random.nextBoolean() ? "VENTA" : "ALQUILER");
         p.setEliminada(false);
         propiedadRepository.save(p);
     }

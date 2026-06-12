@@ -32,5 +32,5 @@ public interface IPropiedadService {
 
         Page<Propiedad> buscarConFiltros(BusquedaDTO dto, Pageable pageable);
 
-        FacetaDTO getFacetas();
+        FacetaDTO getFacetas(BusquedaDTO filtros);
 }

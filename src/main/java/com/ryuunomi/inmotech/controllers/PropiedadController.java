@@ -70,6 +70,7 @@ public class PropiedadController {
 
     @GetMapping("/buscar")
     public PageResponse<PropiedadDTO> buscar(
+            @RequestParam(required = false) String operacion,
             @RequestParam(required = false) String texto,
             @RequestParam(required = false) String ciudad,
             @RequestParam(required = false) String provincia,
@@ -81,7 +82,7 @@ public class PropiedadController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size
     ) {
-        BusquedaDTO dto = new BusquedaDTO(texto, ciudad, provincia, tipo, precioMin, precioMax, superficieMin, superficieMax);
+        BusquedaDTO dto = new BusquedaDTO(operacion, texto, ciudad, provincia, tipo, precioMin, precioMax, superficieMin, superficieMax);
         org.springframework.data.domain.Page<Propiedad> pageResult =
             propiedadService.buscarConFiltros(dto, org.springframework.data.domain.PageRequest.of(page, size));
         List<PropiedadDTO> dtos = pageResult.getContent().stream()
@@ -93,8 +94,18 @@ public class PropiedadController {
     }
 
     @GetMapping("/facetas")
-    public FacetaDTO facetas() {
-        return propiedadService.getFacetas();
+    public FacetaDTO facetas(
+            @RequestParam(required = false) String operacion,
+            @RequestParam(required = false) String ciudad,
+            @RequestParam(required = false) String provincia,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String precioMin,
+            @RequestParam(required = false) String precioMax,
+            @RequestParam(required = false) String superficieMin,
+            @RequestParam(required = false) String superficieMax
+    ) {
+        BusquedaDTO dto = new BusquedaDTO(operacion, null, ciudad, provincia, tipo, precioMin, precioMax, superficieMin, superficieMax);
+        return propiedadService.getFacetas(dto);
     }
 
 

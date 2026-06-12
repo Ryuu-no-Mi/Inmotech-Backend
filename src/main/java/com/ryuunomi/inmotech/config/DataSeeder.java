@@ -219,6 +219,7 @@ public class DataSeeder implements CommandLineRunner {
         p.setLongitud(-4.0 + random.nextDouble() * 3);
         p.setFechaPublicacion(LocalDateTime.now().minusDays(random.nextInt(180)));
         p.setUsuario(usuario);
+        p.setTipo(tipos[random.nextInt(tipos.length)]);
         p.setEliminada(false);
         propiedadRepository.save(p);
     }

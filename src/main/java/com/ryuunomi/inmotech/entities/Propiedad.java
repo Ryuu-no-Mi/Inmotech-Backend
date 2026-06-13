@@ -86,6 +86,9 @@ public class Propiedad {
     @Column(name = "codigo_postal")
     private String codigoPostal;
 
+    private String distrito;
+    private String barrio;
+
     private Double latitud;
     private Double longitud;
 
@@ -232,6 +235,12 @@ public class Propiedad {
     public void setCodigoPostal(String codigoPostal) {
         this.codigoPostal = codigoPostal;
     }
+
+    public String getDistrito() { return distrito; }
+    public void setDistrito(String distrito) { this.distrito = distrito; }
+
+    public String getBarrio() { return barrio; }
+    public void setBarrio(String barrio) { this.barrio = barrio; }
 
     public Double getLatitud() {
         return latitud;

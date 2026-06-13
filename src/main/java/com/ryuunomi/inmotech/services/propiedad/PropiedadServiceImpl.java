@@ -240,8 +240,10 @@ public class PropiedadServiceImpl implements IPropiedadService {
             ? new BigDecimal(dto.superficieMax()) : null;
 
         return propiedadRepository.buscarConFiltros(
-            dto.operacion(), dto.ciudad(), dto.provincia(), precioMin, precioMax,
-            superficieMin, superficieMax, dto.tipo(), dto.texto(),
+            dto.operacion(), dto.ciudad(), dto.provincia(),
+            dto.distrito(), dto.barrio(),
+            precioMin, precioMax,
+            superficieMin, superficieMax, dto.tipos(), dto.texto(),
             pageable
         );
     }
@@ -259,19 +261,42 @@ public class PropiedadServiceImpl implements IPropiedadService {
 
         Map<String, Long> ciudades = new HashMap<>();
         for (Object[] row : propiedadRepository.countByCiudadGrouped(
-                filtros.operacion(), filtros.provincia(), precioMin, precioMax,
-                superficieMin, superficieMax, filtros.tipo())) {
+                filtros.operacion(), filtros.provincia(), filtros.ciudad(),
+                filtros.distrito(), filtros.barrio(),
+                precioMin, precioMax,
+                superficieMin, superficieMax, filtros.tipos())) {
             ciudades.put((String) row[0], (Long) row[1]);
         }
 
         Map<String, Long> tipos = new HashMap<>();
         for (Object[] row : propiedadRepository.countByTipoGrouped(
-                filtros.operacion(), filtros.provincia(), precioMin, precioMax,
-                superficieMin, superficieMax, filtros.ciudad())) {
+                filtros.operacion(), filtros.provincia(), filtros.ciudad(),
+                filtros.distrito(), filtros.barrio(),
+                precioMin, precioMax,
+                superficieMin, superficieMax, filtros.tipos())) {
             tipos.put((String) row[0], (Long) row[1]);
         }
 
-        return new FacetaDTO(ciudades, tipos);
+        Map<String, Long> distritos = new HashMap<>();
+        Map<String, Long> barrios = new HashMap<>();
+
+        boolean ciudadSeleccionada = filtros.ciudad() != null && !filtros.ciudad().isBlank();
+
+        if (ciudadSeleccionada) {
+            for (Object[] row : propiedadRepository.countByDistritoGrouped(
+                    filtros.operacion(), filtros.ciudad(), filtros.tipos(),
+                    precioMin, precioMax, superficieMin, superficieMax)) {
+                distritos.put((String) row[0], (Long) row[1]);
+            }
+
+            for (Object[] row : propiedadRepository.countByBarrioGrouped(
+                    filtros.operacion(), filtros.ciudad(), filtros.distrito(), filtros.tipos(),
+                    precioMin, precioMax, superficieMin, superficieMax)) {
+                barrios.put((String) row[0], (Long) row[1]);
+            }
+        }
+
+        return new FacetaDTO(ciudades, tipos, distritos, barrios);
     }
 
 

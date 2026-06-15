@@ -6,6 +6,8 @@ import java.util.Map;
 
 public record CityGeoData(
     String ciudad,
+    double latitud,
+    double longitud,
     List<String> distritos,
     Map<String, List<String>> barriosPorDistrito
 ) implements Serializable {}

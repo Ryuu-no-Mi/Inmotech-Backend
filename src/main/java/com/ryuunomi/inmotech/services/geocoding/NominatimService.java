@@ -21,7 +21,7 @@ public class NominatimService {
 
     public Optional<CityGeoData> getCityGeoData(String ciudad) {
         try {
-            Thread.sleep(1100);
+            Thread.sleep(1100); // Respetar la política de uso de Nominatim
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -40,11 +40,18 @@ public class NominatimService {
                 return Optional.empty();
             }
 
+            // --- NUEVO: Extraer latitud y longitud del primer resultado principal ---
+            Map<String, Object> firstResult = results.get(0);
+            double latitud = Double.parseDouble(firstResult.get("lat").toString());
+            double longitud = Double.parseDouble(firstResult.get("lon").toString());
+            // ------------------------------------------------------------------------
+
             Set<String> distritosSet = new LinkedHashSet<>();
             Map<String, Set<String>> barriosPorDistrito = new LinkedHashMap<>();
 
             for (Map<String, Object> result : results) {
                 Map<String, Object> address = (Map<String, Object>) result.get("address");
+                if (address == null) continue; // Evitar NullPointerException si algún resultado no tiene address
 
                 String suburb = (String) address.get("suburb");
                 String neighbourhood = (String) address.get("neighbourhood");
@@ -83,7 +90,14 @@ public class NominatimService {
                 barriosMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
             }
 
-            return Optional.of(new CityGeoData(ciudad, new ArrayList<>(distritosSet), barriosMap));
+            // CORREGIDO: Ahora enviamos los 5 parámetros en el orden correcto
+            return Optional.of(new CityGeoData(
+                    ciudad,
+                    latitud,
+                    longitud,
+                    new ArrayList<>(distritosSet),
+                    barriosMap
+            ));
 
         } catch (Exception e) {
             System.err.println("Nominatim error for " + ciudad + ": " + e.getMessage());

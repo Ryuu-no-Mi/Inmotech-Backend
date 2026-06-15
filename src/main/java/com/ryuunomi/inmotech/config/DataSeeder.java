@@ -1,5 +1,8 @@
 package com.ryuunomi.inmotech.config;
 
+import com.ryuunomi.inmotech.config.MapaGeograficoEstatico.ComunidadAutonoma;
+import com.ryuunomi.inmotech.config.MapaGeograficoEstatico.Municipio;
+import com.ryuunomi.inmotech.config.MapaGeograficoEstatico.Provincia;
 import com.ryuunomi.inmotech.dto.CityGeoData;
 import com.ryuunomi.inmotech.entities.*;
 import com.ryuunomi.inmotech.enums.*;
@@ -28,28 +31,6 @@ public class DataSeeder implements CommandLineRunner {
 
     private final Random random = new Random(42);
 
-    private static final String[] CIUDADES = {
-        "Madrid", "Barcelona", "Valencia", "Malaga", "Sevilla", "Bilbao", "Zaragoza", "Murcia",
-        "Palma de Mallorca", "Las Palmas de Gran Canaria", "Cordoba", "Alicante", "Valladolid",
-        "Vigo", "Gijon", "Granada", "Elche", "Oviedo", "Santa Cruz de Tenerife", "Pamplona",
-        "Almeria", "San Sebastian", "Burgos", "Santander", "Toledo", "Segovia", "Soria",
-        "Cuenca", "Huesca", "Teruel", "Lleida", "Girona", "Tarragona", "Castellon",
-        "Badajoz", "Caceres", "Huelva", "Cadiz", "Jaen", "Albacete",
-        "Ciudad Real", "Guadalajara", "Salamanca", "Zamora", "Leon", "Palencia",
-        "Pontevedra", "Lugo", "Ourense", "A Coruna", "Santiago de Compostela", "Avila",
-        "Talavera de la Reina", "Rivas-Vaciamadrid", "Mostoles", "Alcorcon",
-        "Getafe", "Fuenlabrada", "Leganes", "Alcobendas", "Torrejon de Ardoz", "Parla",
-        "Alcala de Henares", "Manresa", "Mataro", "Granollers", "Vilanova i la Geltru",
-        "Reus", "Badalona", "Hospitalet de Llobregat", "Sabadell", "Terrassa",
-        "Marbella", "Estepona", "Torremolinos", "Benalmadena", "Fuengirola", "Velez-Malaga",
-        "Cartagena", "Lorca", "Mazarrón", "Orihuela", "Alcoy", "Benidorm", "Torrevieja",
-        "Jerez de la Frontera", "Algeciras", "San Roque", "Linares", "Ubeda", "Baeza",
-        "Merida", "Don Benito", "Almendralejo", "Zafra", "Trujillo", "Montijo",
-        "Plasencia", "Navalmoral de la Mata", "Castuera", "Villafranca de los Barros",
-        "Logroño", "Haro", "Calahorra", "Barbastro", "Monzon", "Calatayud",
-        "Motril", "Roquetas de Mar", "El Ejido", "Punta Umbria", "Lepe", "Aljaraque"
-    };
-
     private static final String[] CALLES = {
         "Calle Mayor", "Avenida Gran Via", "Paseo de la Castellana", "Calle Serrano",
         "Avenida Diagonal", "Calle Alcala", "Paseo de Recoletos", "Calle Preciados",
@@ -58,15 +39,17 @@ public class DataSeeder implements CommandLineRunner {
         "Calle Real", "Paseo de la Alameda", "Calle Nueva", "Avenida de la Constitucion",
         "Calle Fuencarral", "Calle Gran Via", "Calle Preciados", "Calle Arenal",
         "Calle del Carmen", "Calle del Barco", "Calle Desengaño", "Calle Montera",
-        "Avenida Reyes Catolicos", "Avenida Dr. Marañon", "Avenida de la Universidad",
+        "Avenida Reyes Catolicos", "Avenida Dr. Maranon", "Avenida de la Universidad",
         "Calle Larios", "Calle Nueva", "Calle de la Marina", "Avenida de Cervantes",
         "Calle de la Moneda", "Plaza de la Constitucion", "Calle de los Herreros",
-        "Calle del Almirante", "Calle de la Paz", "Calle de San Juan"
+        "Calle del Almirante", "Calle de la Paz", "Calle de San Juan",
+        "Calle del Pilar", "Avenida de la Palmera", "Calle del Sol", "Avenida del Mar",
+        "Calle Ronda", "Paseo Maritimo", "Calle del Rio", "Avenida del Parador"
     };
 
     private static final String[] TIPOS = {"PISO", "CASA", "CHALET", "ATICO", "ESTUDIO", "DUPLEX", "PENTHOUSE", "VILLA"};
 
-    private static final String[] AGENCIAS_PREMium = {
+    private static final String[] AGENCIAS_PREMIUM = {
         "Inmotech Madrid Centro", "Inmotech Barcelona Costa", "Inmotech Valencia Mediterranea",
         "Inmotech Andalucia Sur", "Inmotech Pais Vasco Norte", "Inmotech Galicia Atlantico",
         "Inmotech Castilla Leon", "Inmotech Murcia Sureste", "Inmotech Aragon Este", "Inmotech Canarias Global"
@@ -76,6 +59,8 @@ public class DataSeeder implements CommandLineRunner {
         "Inmotech Leon Minor", "Inmotech Cuenca Este", "Inmotech Jaen Sur",
         "Inmotech Tarragona Costa", "Inmotech Albacete Norte"
     };
+
+    private List<String> listaMunicipios;
 
     public DataSeeder(UsuarioRepository usuarioRepository, AgenciaRepository agenciaRepository,
                       PlanRepository planRepository, SuscripcionRepository suscripcionRepository,
@@ -97,6 +82,9 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("=== DATA SEEDER: Datos ya existentes, omitiendo ===");
             return;
         }
+
+        listaMunicipios = MapaGeograficoEstatico.getAllMunicipios();
+        System.out.println("=== DATA SEEDER: Mapa geografico cargado con " + listaMunicipios.size() + " municipios ===");
 
         System.out.println("=== DATA SEEDER: Creando 30.000+ propiedades de prueba ===");
 
@@ -121,10 +109,7 @@ public class DataSeeder implements CommandLineRunner {
 
         long startTime = System.currentTimeMillis();
 
-        geocodingService.precargarCache(Arrays.asList(CIUDADES));
-
-        int[] propsPorUsuario = {55, 50, 48, 47};
-        crearUsuariosNormales(premiumPlan, propsPorUsuario);
+        crearUsuariosNormales(premiumPlan);
 
         int totalAgencias = 15;
         int agentesPorAgenciaPremium = 5;
@@ -141,7 +126,7 @@ public class DataSeeder implements CommandLineRunner {
         List<Usuario> todosLosAgentes = new ArrayList<>();
         List<Usuario> agentesInactivos = new ArrayList<>();
 
-        for (int a = 0; a < AGENCIAS_PREMium.length; a++) {
+        for (int a = 0; a < AGENCIAS_PREMIUM.length; a++) {
             LocalDate expiryPlan = LocalDate.now().plusDays(60 + random.nextInt(180));
             boolean esAgenciaInactiva = agenciasInactivas.contains(a);
             if (esAgenciaInactiva) {
@@ -149,8 +134,8 @@ public class DataSeeder implements CommandLineRunner {
             }
 
             Agencia agencia = new Agencia();
-            agencia.setNombre(AGENCIAS_PREMium[a]);
-            agencia.setDescripcion("Agencia inmobiliaria " + AGENCIAS_PREMium[a] + " con mas de 10 anos de experiencia");
+            agencia.setNombre(AGENCIAS_PREMIUM[a]);
+            agencia.setDescripcion("Agencia inmobiliaria " + AGENCIAS_PREMIUM[a] + " con mas de 10 anos de experiencia");
             agencia.setPlan(agenciaPremiumPlan);
             agencia.setFechaExpiracionPlan(expiryPlan);
             agencia = agenciaRepository.save(agencia);
@@ -251,7 +236,8 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("Tiempo total: " + totalTime + "ms (" + (totalTime / 1000) + "s)");
     }
 
-    private void crearUsuariosNormales(Plan premiumPlan, int[] propsCounts) {
+    private void crearUsuariosNormales(Plan premiumPlan) {
+        int[] propsCounts = {55, 50, 48, 47};
         String[][] usuariosData = {
             {"Gratuito", "gratuito", "GRATIS", "0"},
             {"Premium", "premium", "PREMIUM", String.valueOf(random.nextInt(365) + 30)},
@@ -320,7 +306,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Propiedad crearPropiedad(Usuario usuario, int index) {
-        String ciudad = CIUDADES[random.nextInt(CIUDADES.length)];
+        String ciudad = listaMunicipios.get(random.nextInt(listaMunicipios.size()));
         String tipo = TIPOS[random.nextInt(TIPOS.length)];
         boolean esAlquiler = random.nextDouble() < 0.3;
 
@@ -329,9 +315,16 @@ public class DataSeeder implements CommandLineRunner {
             : BigDecimal.valueOf(80000 + random.nextInt(420000));
 
         CityGeoData geo = geocodingService.getGeoData(ciudad);
+        String provincia = geocodingService.getProvincia(ciudad);
+        String comunidad = geocodingService.getComunidad(ciudad);
         String distrito = geocodingService.getDistritoAleatorio(ciudad);
         String barrio = geocodingService.getBarrioAleatorio(ciudad, distrito);
         String calle = CALLES[random.nextInt(CALLES.length)] + " " + (1 + random.nextInt(200));
+
+        double latitudBase = geo.latitud();
+        double longitudBase = geo.longitud();
+        double latitud = latitudBase + (random.nextDouble() - 0.5) * 0.1;
+        double longitud = longitudBase + (random.nextDouble() - 0.5) * 0.1;
 
         String descripcion = generarDescripcion(tipo, ciudad, barrio, calle, geo, esAlquiler);
 
@@ -342,10 +335,10 @@ public class DataSeeder implements CommandLineRunner {
         p.setSuperficie(BigDecimal.valueOf(40 + random.nextInt(350)));
         p.setDireccion(calle);
         p.setCiudad(ciudad);
-        p.setProvincia(getProvincia(ciudad));
-        p.setCodigoPostal(generarCodigoPostal(ciudad));
-        p.setLatitud(generarLatitud(ciudad));
-        p.setLongitud(generarLongitud(ciudad));
+        p.setProvincia(provincia != null ? provincia : ciudad);
+        p.setCodigoPostal(generarCodigoPostal(provincia, comunidad));
+        p.setLatitud(latitud);
+        p.setLongitud(longitud);
         p.setFechaPublicacion(LocalDateTime.now().minusDays(random.nextInt(180)));
         p.setUsuario(usuario);
         p.setTipo(tipo);
@@ -382,56 +375,35 @@ public class DataSeeder implements CommandLineRunner {
                ". Ideal para " + uso + "." + extras[random.nextInt(extras.length)];
     }
 
-    private String getProvincia(String ciudad) {
-        String[][] grupos = {
-            {"Madrid", "Alcala de Henares", "Fuenlabrada", "Mostoles", "Leganes", "Getafe", "Alcobendas", "Parla", "Torrejon de Ardoz", "Rivas-Vaciamadrid"},
-            {"Barcelona", "L'Hospitalet", "Badalona", "Sabadell", "Terrassa", "Mataro", "Granollers", "Manresa", "Vilanova i la Geltru", "Reus"},
-            {"Valencia", "Alicante", "Elche", "Castellon", "Alcoy", "Benidorm", "Orihuela", "Torrevieja"},
-            {"Sevilla", "Cadiz", "Jerez de la Frontera", "Algeciras", "Huelva", "Cordoba", "Granada", "Malaga", "Marbella", "Estepona"},
-            {"Bilbao", "Vitoria-Gasteiz", "San Sebastian", "Santander", "Burgos", "Logroño"},
-            {"A Coruna", "Santiago de Compostela", "Lugo", "Ourense", "Pontevedra", "Vigo", "Gijon"},
-            {"Valladolid", "Leon", "Palencia", "Zamora", "Salamanca", "Segovia", "Avila", "Soria", "Burgos"},
-            {"Murcia", "Cartagena", "Lorca", "Mazarrón", "Orihuela"},
-            {"Zaragoza", "Huesca", "Teruel", "Calatayud", "Barbastro", "Monzon"},
-            {"Las Palmas de Gran Canaria", "Santa Cruz de Tenerife"}
+    private String generarCodigoPostal(String provincia, String comunidad) {
+        if (provincia == null) provincia = "";
+        if (comunidad == null) comunidad = "";
+
+        String provNorm = provincia.toLowerCase().replace("á", "a").replace("é", "e")
+            .replace("í", "i").replace("ó", "o").replace("ú", "u");
+
+        return switch (provNorm) {
+            case "madrid" -> "28" + String.format("%03d", random.nextInt(100));
+            case "barcelona" -> "08" + String.format("%03d", random.nextInt(100));
+            case "valencia", "alicante", "castellón" -> "46" + String.format("%03d", random.nextInt(100));
+            case "sevilla", "cádiz", "huelva", "córdoba", "jaén", "granada", "almería", "málaga" -> "41" + String.format("%03d", random.nextInt(100));
+            case "bizkaia", "gipuzkoa", "araba" -> "48" + String.format("%03d", random.nextInt(100));
+            case "a coruña", "lugo", "ourense", "pontevedra" -> "15" + String.format("%03d", random.nextInt(100));
+            case "asturias" -> "33" + String.format("%03d", random.nextInt(100));
+            case "cantabria" -> "39" + String.format("%03d", random.nextInt(100));
+            case "burgos", "león", "palencia", "salamanca", "segovia", "soria", "valladolid", "zamora", "ávila" -> "09" + String.format("%03d", random.nextInt(100));
+            case "toledo", "cuenca", "guadalajara", "albacete", "ciudad real" -> "16" + String.format("%03d", random.nextInt(100));
+            case "badajoz", "cáceres" -> "06" + String.format("%03d", random.nextInt(100));
+            case "murcia" -> "30" + String.format("%03d", random.nextInt(100));
+            case "zaragoza", "huesca" -> "50" + String.format("%03d", random.nextInt(100));
+            case "tarragona", "girona", "lleida" -> "25" + String.format("%03d", random.nextInt(100));
+            case "las palmas", "santa cruz de tenerife" -> "35" + String.format("%03d", random.nextInt(100));
+            case "illes balears" -> "07" + String.format("%03d", random.nextInt(100));
+            case "navarra" -> "31" + String.format("%03d", random.nextInt(100));
+            case "la rioja" -> "26" + String.format("%03d", random.nextInt(100));
+            case "hueiva" -> "21" + String.format("%03d", random.nextInt(100));
+            case "teruel" -> "44" + String.format("%03d", random.nextInt(100));
+            default -> "28" + String.format("%03d", random.nextInt(100));
         };
-        String[] provs = {"Madrid", "Barcelona", "Valencia", "Sevilla", "Bizkaia", "Galicia", "Castilla y Leon", "Murcia", "Aragon", "Canarias"};
-        for (int g = 0; g < grupos.length; g++) {
-            for (String c : grupos[g]) {
-                if (c.equalsIgnoreCase(ciudad)) return provs[g];
-            }
-        }
-        return ciudad;
-    }
-
-    private String generarCodigoPostal(String ciudad) {
-        int cp = switch (getProvincia(ciudad)) {
-            case "Madrid" -> 28000 + random.nextInt(100);
-            case "Barcelona" -> 8000 + random.nextInt(100);
-            case "Valencia" -> 46000 + random.nextInt(100);
-            case "Sevilla" -> 41000 + random.nextInt(100);
-            case "Bizkaia" -> 48000 + random.nextInt(100);
-            case "Galicia" -> 15000 + random.nextInt(100);
-            case "Castilla y Leon" -> 47000 + random.nextInt(100);
-            case "Murcia" -> 30000 + random.nextInt(100);
-            case "Aragon" -> 50000 + random.nextInt(100);
-            case "Canarias" -> 35000 + random.nextInt(100);
-            default -> 28000 + random.nextInt(50000);
-        };
-        return String.valueOf(cp);
-    }
-
-    private double generarLatitud(String ciudad) {
-        if (ciudad.contains("Canaria") || ciudad.contains("Las Palmas") || ciudad.contains("Tenerife")) {
-            return 27.0 + random.nextDouble() * 2;
-        }
-        return 36.0 + random.nextDouble() * 8;
-    }
-
-    private double generarLongitud(String ciudad) {
-        if (ciudad.contains("Canaria") || ciudad.contains("Las Palmas") || ciudad.contains("Tenerife")) {
-            return -18.0 + random.nextDouble() * 2;
-        }
-        return -9.0 + random.nextDouble() * 5;
     }
 }

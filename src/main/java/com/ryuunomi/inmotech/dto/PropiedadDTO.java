@@ -20,6 +20,16 @@ public record PropiedadDTO(
         String fechaPublicacion,
         Long idUsuario,
         Long idAgencia,
-        List<ImagenPropiedadDTO> imagenes
+        List<ImagenPropiedadDTO> imagenes,
+        String tipo,
+        String operacion,
+        String distrito,
+        String barrio,
+        Integer habitaciones,
+        Integer banos,
+        Boolean parking,
+        Integer anoConstruccion,
+        String estado,
+        String certificacionEnergetica
 
 ) {}

@@ -135,6 +135,16 @@ public class PropiedadServiceImpl implements IPropiedadService {
         existente.setCodigoPostal(propiedad.getCodigoPostal());
         existente.setLatitud(propiedad.getLatitud());
         existente.setLongitud(propiedad.getLongitud());
+        existente.setTipo(propiedad.getTipo());
+        existente.setOperacion(propiedad.getOperacion());
+        existente.setDistrito(propiedad.getDistrito());
+        existente.setBarrio(propiedad.getBarrio());
+        existente.setHabitaciones(propiedad.getHabitaciones());
+        existente.setBanos(propiedad.getBanos());
+        existente.setParking(propiedad.getParking());
+        existente.setAnoConstruccion(propiedad.getAnoConstruccion());
+        existente.setEstado(propiedad.getEstado());
+        existente.setCertificacionEnergetica(propiedad.getCertificacionEnergetica());
         existente.setImagenPortada(propiedad.getImagenPortada());
 
         //existente.setUsuario(propiedad.getUsuario());

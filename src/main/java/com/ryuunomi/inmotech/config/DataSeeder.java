@@ -49,6 +49,10 @@ public class DataSeeder implements CommandLineRunner {
 
     private static final String[] TIPOS = {"PISO", "CASA", "CHALET", "ATICO", "ESTUDIO", "DUPLEX", "PENTHOUSE", "VILLA"};
 
+    private static final EstadoPropiedad[] ESTADOS = EstadoPropiedad.values();
+
+    private static final CertificacionEnergetica[] CERTIFICACIONES = CertificacionEnergetica.values();
+
     private static final String[] AGENCIAS_PREMIUM = {
         "Inmotech Madrid Centro", "Inmotech Barcelona Costa", "Inmotech Valencia Mediterranea",
         "Inmotech Andalucia Sur", "Inmotech Pais Vasco Norte", "Inmotech Galicia Atlantico",
@@ -346,6 +350,12 @@ public class DataSeeder implements CommandLineRunner {
         p.setDistrito(distrito);
         p.setBarrio(barrio);
         p.setEliminada(false);
+        p.setHabitaciones(1 + random.nextInt(6));
+        p.setBanos(1 + random.nextInt(4));
+        p.setParking(random.nextBoolean());
+        p.setAnoConstruccion(1970 + random.nextInt(56));
+        p.setEstado(ESTADOS[random.nextInt(ESTADOS.length)]);
+        p.setCertificacionEnergetica(CERTIFICACIONES[random.nextInt(CERTIFICACIONES.length)]);
         return p;
     }
 

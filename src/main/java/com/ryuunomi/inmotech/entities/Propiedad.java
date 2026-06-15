@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.ryuunomi.inmotech.enums.CertificacionEnergetica;
+import com.ryuunomi.inmotech.enums.EstadoPropiedad;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -88,6 +91,15 @@ public class Propiedad {
 
     private String distrito;
     private String barrio;
+
+    private Integer habitaciones;
+    private Integer banos;
+    private Boolean parking;
+    private Integer anoConstruccion;
+    @Enumerated(EnumType.STRING)
+    private EstadoPropiedad estado;
+    @Enumerated(EnumType.STRING)
+    private CertificacionEnergetica certificacionEnergetica;
 
     private Double latitud;
     private Double longitud;
@@ -241,6 +253,24 @@ public class Propiedad {
 
     public String getBarrio() { return barrio; }
     public void setBarrio(String barrio) { this.barrio = barrio; }
+
+    public Integer getHabitaciones() { return habitaciones; }
+    public void setHabitaciones(Integer habitaciones) { this.habitaciones = habitaciones; }
+
+    public Integer getBanos() { return banos; }
+    public void setBanos(Integer banos) { this.banos = banos; }
+
+    public Boolean getParking() { return parking; }
+    public void setParking(Boolean parking) { this.parking = parking; }
+
+    public Integer getAnoConstruccion() { return anoConstruccion; }
+    public void setAnoConstruccion(Integer anoConstruccion) { this.anoConstruccion = anoConstruccion; }
+
+    public EstadoPropiedad getEstado() { return estado; }
+    public void setEstado(EstadoPropiedad estado) { this.estado = estado; }
+
+    public CertificacionEnergetica getCertificacionEnergetica() { return certificacionEnergetica; }
+    public void setCertificacionEnergetica(CertificacionEnergetica certificacionEnergetica) { this.certificacionEnergetica = certificacionEnergetica; }
 
     public Double getLatitud() {
         return latitud;

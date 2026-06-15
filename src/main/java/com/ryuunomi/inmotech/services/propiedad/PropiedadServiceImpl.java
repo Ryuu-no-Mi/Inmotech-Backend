@@ -1,5 +1,6 @@
 package com.ryuunomi.inmotech.services.propiedad;
 
+import com.ryuunomi.inmotech.config.MapaGeograficoEstatico;
 import com.ryuunomi.inmotech.dto.BusquedaDTO;
 import com.ryuunomi.inmotech.dto.FacetaDTO;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
@@ -306,7 +307,18 @@ public class PropiedadServiceImpl implements IPropiedadService {
             }
         }
 
-        return new FacetaDTO(ciudades, tipos, distritos, barrios);
+        Map<String, Map<String, Long>> comunidades = new HashMap<>();
+        for (Map.Entry<String, Long> ciudadEntry : ciudades.entrySet()) {
+            String ciudad = ciudadEntry.getKey();
+            String comunidad = MapaGeograficoEstatico.getComunidad(ciudad);
+            if (comunidad != null) {
+                comunidades.computeIfAbsent(comunidad, k -> new HashMap<>()).put(ciudad, ciudadEntry.getValue());
+            } else {
+                comunidades.computeIfAbsent("Otras", k -> new HashMap<>()).put(ciudad, ciudadEntry.getValue());
+            }
+        }
+
+        return new FacetaDTO(comunidades, ciudades, tipos, distritos, barrios);
     }
 
 

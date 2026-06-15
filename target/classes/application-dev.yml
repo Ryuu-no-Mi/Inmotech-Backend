@@ -4,25 +4,25 @@
 # Google OAuth2 - Configurar en Google Cloud Console
 # https://console.cloud.google.com/apis/credentials
 # Authorized redirect URI: http://localhost:8080/login/oauth2/code/google
-spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
-spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+spring.security.oauth2.client.registration.google.client-id: ${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret: ${GOOGLE_CLIENT_SECRET}
 
 # Email SMTP (Gmail) - Fase 4
-# spring.mail.host=smtp.gmail.com
-# spring.mail.port=587
-# spring.mail.username=${MAIL_USERNAME}
-# spring.mail.password=${MAIL_PASSWORD}
-# spring.mail.properties.mail.smtp.auth=true
-# spring.mail.properties.mail.smtp.starttls.enable=true
+# spring.mail.host: smtp.gmail.com
+# spring.mail.port: 587
+# spring.mail.username: ${MAIL_USERNAME}
+# spring.mail.password: ${MAIL_PASSWORD}
+# spring.mail.properties.mail.smtp.auth: true
+# spring.mail.properties.mail.smtp.starttls.enable: true
 
 # Stripe - Fase 3
-stripe.api.key=${STRIPE_API_KEY:sk_test_placeholder}
-stripe.webhook.secret=${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
-stripe.price.id=${STRIPE_PRICE_ID:price_placeholder}
+stripe.api.key: ${STRIPE_API_KEY:sk_test_placeholder}
+stripe.webhook.secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
+stripe.price.id: ${STRIPE_PRICE_ID:price_placeholder}
 
 # OpenAI - Fase 5
-# openai.api.key=${OPENAI_API_KEY}
+# openai.api.key: ${OPENAI_API_KEY}
 
 # Logging
-logging.level.com.ryuunomi.inmotech=DEBUG
-logging.level.org.springframework.security=DEBUG
+logging.level.com.ryuunomi.inmotech: DEBUG
+logging.level.org.springframework.security: DEBUG

@@ -11,19 +11,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class JwtValidationFilter extends OncePerRequestFilter {
-    private final SecretKey secretKey = TokenJwtConfig.SECRET_KEY;
+    private final SecretKey secretKey;
+    private final UserDetailsService userDetailsService;
+
+    public JwtValidationFilter(SecretKey secretKey, UserDetailsService userDetailsService) {
+        this.secretKey = secretKey;
+        this.userDetailsService = userDetailsService;
+    }
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -45,19 +50,11 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
             String username = claims.getSubject();
 
-            // <-- ¡NUEVO! Obtener los roles de los claims
-            List<String> rolesFromClaims = (List<String>) claims.get("roles"); // Cast a List<String>
-            List<GrantedAuthority> authorities = null;
-
-            if (rolesFromClaims != null && !rolesFromClaims.isEmpty()) {
-                authorities = rolesFromClaims.stream()
-                        .map(SimpleGrantedAuthority::new) // Convierte cada String de rol a SimpleGrantedAuthority
-                        .collect(Collectors.toList());
-            }
-
             if (username != null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails.getUsername(), null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

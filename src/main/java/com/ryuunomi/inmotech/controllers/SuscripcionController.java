@@ -1,13 +1,15 @@
 package com.ryuunomi.inmotech.controllers;
 
 import com.ryuunomi.inmotech.entities.Usuario;
-import com.ryuunomi.inmotech.security.util.JwtUtils;
+import com.ryuunomi.inmotech.security.AuthorizationService;
 import com.ryuunomi.inmotech.services.suscripcion.ISuscripcionService;
 import com.ryuunomi.inmotech.services.suscripcion.SuscripcionLimitsDTO;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/subscription")
@@ -19,17 +21,14 @@ public class SuscripcionController {
     @Autowired
     private IUsuarioService usuarioService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/limits")
-    public ResponseEntity<?> getLimits(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getLimits(Authentication authentication) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            String email = JwtUtils.getEmailFromToken(token);
-            Usuario usuario = usuarioService.findByEmail(email).orElse(null);
-
-            if (usuario == null) {
-                return ResponseEntity.status(401).body("Usuario no encontrado");
-            }
-
+            Usuario usuario = authorizationService.requireCurrentUser(authentication);
             SuscripcionLimitsDTO limites = suscripcionService.obtenerLimites(usuario);
             return ResponseEntity.ok(limites);
         } catch (Exception e) {
@@ -37,24 +36,4 @@ public class SuscripcionController {
         }
     }
 
-    @PostMapping("/confirmar-premium")
-    public ResponseEntity<?> confirmarPremium(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.replace("Bearer ", "");
-            String email = JwtUtils.getEmailFromToken(token);
-            Usuario usuario = usuarioService.findByEmail(email).orElse(null);
-
-            if (usuario == null) {
-                return ResponseEntity.status(401).body("Usuario no encontrado");
-            }
-
-            suscripcionService.activarPremium(usuario.getId(), null);
-            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Premium activado correctamente"));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError()
-                    .body(java.util.Map.of("error", "Error al activar premium: " + e.getMessage()));
-        }
-    }
 }

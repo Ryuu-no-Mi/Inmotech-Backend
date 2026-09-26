@@ -1,7 +1,6 @@
 package com.ryuunomi.inmotech.security.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ryuunomi.inmotech.security.filter.TokenJwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.ServletException;

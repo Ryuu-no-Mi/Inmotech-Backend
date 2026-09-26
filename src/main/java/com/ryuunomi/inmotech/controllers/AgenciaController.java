@@ -5,12 +5,14 @@ import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.entities.Usuario;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import com.ryuunomi.inmotech.mapper.AgenciaMapper;
+import com.ryuunomi.inmotech.security.AuthorizationService;
 import com.ryuunomi.inmotech.services.agencia.IAgenciaService;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,6 +29,9 @@ public class AgenciaController {
 
     @Autowired
     private IUsuarioService usuarioService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     @GetMapping
     public List<AgenciaDTO> listAll() {
@@ -49,8 +54,12 @@ public class AgenciaController {
 
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> create(@RequestBody AgenciaDTO dto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> create(@RequestBody AgenciaDTO dto, Authentication authentication) {
+        Usuario actor = authorizationService.requireCurrentUser(authentication);
+        if (!authorizationService.isGlobalAdmin(actor)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo un administrador global puede crear agencias");
+        }
         Optional<Usuario> optionalUsuario = usuarioService.findById(dto.idUsuarioAdmin());
 
         if (optionalUsuario.isEmpty()) {
@@ -79,7 +88,10 @@ public class AgenciaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody AgenciaDTO dto) {
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody AgenciaDTO dto,
+                                    Authentication authentication) {
+        Usuario actor = authorizationService.requireCurrentUser(authentication);
         Optional<Agencia> agenciaOptional = agenciaService.findById(id);
 
         if (agenciaOptional.isEmpty()) {
@@ -87,6 +99,10 @@ public class AgenciaController {
         }
 
         Agencia agenciaExistente = agenciaOptional.get();
+
+        if (!authorizationService.canManageAgency(actor, agenciaExistente)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar esta agencia");
+        }
 
         Optional<Usuario> nuevoAdminOpt = usuarioService.findById(dto.idUsuarioAdmin());
         if (nuevoAdminOpt.isEmpty()) {
@@ -97,6 +113,11 @@ public class AgenciaController {
         Long idNuevoAdmin = dto.idUsuarioAdmin();
 
         boolean adminCambiado = !Objects.equals(idAdminAnterior, idNuevoAdmin);
+
+        if (adminCambiado && !authorizationService.isGlobalAdmin(actor)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Solo un administrador global puede cambiar el administrador de una agencia");
+        }
 
         if (adminCambiado) {
             Usuario nuevoAdmin = nuevoAdminOpt.get();
@@ -133,13 +154,18 @@ public class AgenciaController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (agenciaService.findById(id).isPresent()) {
-            agenciaService.delete(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
+    public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
+        Usuario actor = authorizationService.requireCurrentUser(authentication);
+        Optional<Agencia> agencia = agenciaService.findById(id);
+        if (agencia.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        if (!authorizationService.canManageAgency(actor, agencia.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        agenciaService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

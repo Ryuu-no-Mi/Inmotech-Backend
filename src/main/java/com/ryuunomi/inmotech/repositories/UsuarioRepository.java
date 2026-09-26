@@ -16,6 +16,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario,Long> {
 
     Optional<Usuario> findByEmail(String email);
 
+    Optional<Usuario> findBySuscripcion_StripeSubscriptionId(String stripeSubscriptionId);
+
     boolean existsByEmail(String email);
 
     Optional<Usuario> findByProviderAndProviderId(AuthProvider provider, String providerId);

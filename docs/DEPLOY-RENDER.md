@@ -18,7 +18,7 @@ SPRING_PROFILES_ACTIVE=render
 SPRING_DATASOURCE_URL=jdbc:mysql://inmotech-inmotech.d.aivencloud.com:13085/defaultdb?sslMode=REQUIRED&serverTimezone=UTC
 SPRING_DATASOURCE_USERNAME=avnadmin
 SPRING_DATASOURCE_PASSWORD=<contraseña actual de Aiven>
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
+SPRING_JPA_HIBERNATE_DDL_AUTO=none
 JWT_SECRET=<secreto aleatorio de al menos 32 bytes>
 CORS_ALLOWED_ORIGINS=<URL pública del frontend>
 ```
@@ -31,7 +31,7 @@ Render puede generar `JWT_SECRET` automáticamente desde `render.yaml`. La contr
 2. Confirmar las variables de entorno, especialmente la contraseña de Aiven y `CORS_ALLOWED_ORIGINS`.
 3. Esperar a que `/actuator/health` responda `UP`.
 4. Revisar los logs: el primer arranque crea el esquema y carga el seeder actual.
-5. Mantener `SPRING_JPA_HIBERNATE_DDL_AUTO=update` solo durante la inicialización del demo. Después, cambiar a `validate` cuando exista una migración versionada.
+5. El perfil Render usa `none` porque el esquema se inicializa previamente en Aiven. Cambiarlo solo si se aplica una migración controlada.
 
 ## Frontend
 

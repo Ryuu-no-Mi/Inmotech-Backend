@@ -1,5 +1,8 @@
 package com.ryuunomi.inmotech.services.propiedad;
 
+import com.ryuunomi.inmotech.config.MapaGeograficoEstatico;
+import com.ryuunomi.inmotech.dto.BusquedaDTO;
+import com.ryuunomi.inmotech.dto.FacetaDTO;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.entities.Usuario;
@@ -9,11 +12,16 @@ import com.ryuunomi.inmotech.repositories.ImagenPropiedadRepository;
 import com.ryuunomi.inmotech.repositories.PropiedadRepository;
 import com.ryuunomi.inmotech.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -128,6 +136,16 @@ public class PropiedadServiceImpl implements IPropiedadService {
         existente.setCodigoPostal(propiedad.getCodigoPostal());
         existente.setLatitud(propiedad.getLatitud());
         existente.setLongitud(propiedad.getLongitud());
+        existente.setTipo(propiedad.getTipo());
+        existente.setOperacion(propiedad.getOperacion());
+        existente.setDistrito(propiedad.getDistrito());
+        existente.setBarrio(propiedad.getBarrio());
+        existente.setHabitaciones(propiedad.getHabitaciones());
+        existente.setBanos(propiedad.getBanos());
+        existente.setParking(propiedad.getParking());
+        existente.setAnoConstruccion(propiedad.getAnoConstruccion());
+        existente.setEstado(propiedad.getEstado());
+        existente.setCertificacionEnergetica(propiedad.getCertificacionEnergetica());
         existente.setImagenPortada(propiedad.getImagenPortada());
 
         //existente.setUsuario(propiedad.getUsuario());
@@ -214,6 +232,93 @@ public class PropiedadServiceImpl implements IPropiedadService {
     @Override
     public List<Propiedad> findByAgenciaId(Long idAgencia) {
         return propiedadRepository.findByAgenciaId(idAgencia);
+    }
+
+    @Override
+    public Page<Propiedad> findAllActivas(Pageable pageable) {
+        return propiedadRepository.findByEliminadaFalse(pageable);
+    }
+
+    @Override
+    public Page<Propiedad> buscarConFiltros(BusquedaDTO dto, Pageable pageable) {
+        BigDecimal precioMin = dto.precioMin() != null && !dto.precioMin().isBlank()
+            ? new BigDecimal(dto.precioMin()) : null;
+        BigDecimal precioMax = dto.precioMax() != null && !dto.precioMax().isBlank()
+            ? new BigDecimal(dto.precioMax()) : null;
+        BigDecimal superficieMin = dto.superficieMin() != null && !dto.superficieMin().isBlank()
+            ? new BigDecimal(dto.superficieMin()) : null;
+        BigDecimal superficieMax = dto.superficieMax() != null && !dto.superficieMax().isBlank()
+            ? new BigDecimal(dto.superficieMax()) : null;
+
+        return propiedadRepository.buscarConFiltros(
+            dto.operacion(), dto.ciudad(), dto.provincia(),
+            dto.distrito(), dto.barrio(),
+            precioMin, precioMax,
+            superficieMin, superficieMax, dto.tipos(), dto.texto(),
+            pageable
+        );
+    }
+
+    @Override
+    public FacetaDTO getFacetas(BusquedaDTO filtros) {
+        BigDecimal precioMin = filtros.precioMin() != null && !filtros.precioMin().isBlank()
+            ? new BigDecimal(filtros.precioMin()) : null;
+        BigDecimal precioMax = filtros.precioMax() != null && !filtros.precioMax().isBlank()
+            ? new BigDecimal(filtros.precioMax()) : null;
+        BigDecimal superficieMin = filtros.superficieMin() != null && !filtros.superficieMin().isBlank()
+            ? new BigDecimal(filtros.superficieMin()) : null;
+        BigDecimal superficieMax = filtros.superficieMax() != null && !filtros.superficieMax().isBlank()
+            ? new BigDecimal(filtros.superficieMax()) : null;
+
+        Map<String, Long> ciudades = new HashMap<>();
+        for (Object[] row : propiedadRepository.countByCiudadGrouped(
+                filtros.operacion(), filtros.provincia(), filtros.ciudad(),
+                filtros.distrito(), filtros.barrio(),
+                precioMin, precioMax,
+                superficieMin, superficieMax, filtros.tipos())) {
+            ciudades.put((String) row[0], (Long) row[1]);
+        }
+
+        Map<String, Long> tipos = new HashMap<>();
+        for (Object[] row : propiedadRepository.countByTipoGrouped(
+                filtros.operacion(), filtros.provincia(), filtros.ciudad(),
+                filtros.distrito(), filtros.barrio(),
+                precioMin, precioMax,
+                superficieMin, superficieMax, filtros.tipos())) {
+            tipos.put((String) row[0], (Long) row[1]);
+        }
+
+        Map<String, Long> distritos = new HashMap<>();
+        Map<String, Long> barrios = new HashMap<>();
+
+        boolean ciudadSeleccionada = filtros.ciudad() != null && !filtros.ciudad().isBlank();
+
+        if (ciudadSeleccionada) {
+            for (Object[] row : propiedadRepository.countByDistritoGrouped(
+                    filtros.operacion(), filtros.ciudad(), filtros.tipos(),
+                    precioMin, precioMax, superficieMin, superficieMax)) {
+                distritos.put((String) row[0], (Long) row[1]);
+            }
+
+            for (Object[] row : propiedadRepository.countByBarrioGrouped(
+                    filtros.operacion(), filtros.ciudad(), filtros.distrito(), filtros.tipos(),
+                    precioMin, precioMax, superficieMin, superficieMax)) {
+                barrios.put((String) row[0], (Long) row[1]);
+            }
+        }
+
+        Map<String, Map<String, Long>> comunidades = new HashMap<>();
+        for (Map.Entry<String, Long> ciudadEntry : ciudades.entrySet()) {
+            String ciudad = ciudadEntry.getKey();
+            String comunidad = MapaGeograficoEstatico.getComunidad(ciudad);
+            if (comunidad != null) {
+                comunidades.computeIfAbsent(comunidad, k -> new HashMap<>()).put(ciudad, ciudadEntry.getValue());
+            } else {
+                comunidades.computeIfAbsent("Otras", k -> new HashMap<>()).put(ciudad, ciudadEntry.getValue());
+            }
+        }
+
+        return new FacetaDTO(comunidades, ciudades, tipos, distritos, barrios);
     }
 
 

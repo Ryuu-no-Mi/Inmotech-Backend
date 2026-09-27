@@ -86,9 +86,7 @@ public class UsuarioServiceImpl implements IUsuarioService{
         // Gestión de contraseña , si viene
         if (usuario.getContrasenia() != null && !usuario.getContrasenia().isBlank()) {
             String raw = usuario.getContrasenia();
-            System.err.println("Raw password recibido: {}" + raw);
             String hashed = passwordEncoder.encode(raw);
-            System.err.println("Password codificada: {}" + hashed);
             usuarioExistente.setContrasenia(hashed);
         }
 
@@ -104,9 +102,8 @@ public class UsuarioServiceImpl implements IUsuarioService{
         }
 
         String rawPassword = usuarioRegistroDTO.password(); // ¡VERIFICA ESTA LÍNEA!
-        System.out.println("Contraseña recibida en el servicio: " + rawPassword);
         if (rawPassword == null || rawPassword.trim().isEmpty()) {
-           System.err.println("¡Advertencia! La contraseña es nula o vacía antes de codificar.");
+           throw new IllegalArgumentException("La contraseña no puede ser nula o vacía.");
         }
 
         String encodedPassword = passwordEncoder.encode(rawPassword);

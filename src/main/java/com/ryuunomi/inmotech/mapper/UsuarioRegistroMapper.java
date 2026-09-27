@@ -51,7 +51,6 @@ public class UsuarioRegistroMapper {
             agencia.setId(usuarioRegistroDTO.idAgencia());
             u.setAgencia(agencia);
         }
-        System.err.println("Password introducida: " + usuarioRegistroDTO.password());
         u.setContrasenia(usuarioRegistroDTO.password());
 
         return u;

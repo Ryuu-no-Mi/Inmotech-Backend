@@ -11,10 +11,13 @@ C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\sr
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\controllers\SuscripcionController.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\controllers\UsuarioController.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\AgenciaDTO.java
+C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\BusquedaDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\ConsultaDTO.java
+C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\FacetaDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\FavoritoDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\ImagenPropiedadDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\ImagenUsuarioDTO.java
+C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\PageResponse.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\PropiedadDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\UsuarioDTO.java
 C:\Users\jmonv\Desktop\Proyectos\Inmotech\Backend-SpringBoot\Inmotech-Backend\src\main\java\com\ryuunomi\inmotech\dto\UsuarioRegistroDTO.java

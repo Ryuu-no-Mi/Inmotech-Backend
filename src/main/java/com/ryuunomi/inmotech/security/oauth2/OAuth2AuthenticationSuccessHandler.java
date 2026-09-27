@@ -1,7 +1,6 @@
 package com.ryuunomi.inmotech.security.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ryuunomi.inmotech.security.filter.TokenJwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.ServletException;
@@ -18,9 +17,16 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import javax.crypto.SecretKey;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+
+    private final SecretKey jwtSecretKey;
+
+    public OAuth2AuthenticationSuccessHandler(SecretKey jwtSecretKey) {
+        this.jwtSecretKey = jwtSecretKey;
+    }
 
     @Value("${app.oauth2.redirect-uri:http://localhost:5173/oauth2/callback}")
     private String redirectUri;
@@ -54,7 +60,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000))
-                .signWith(TokenJwtConfig.SECRET_KEY)
+                .signWith(jwtSecretKey)
                 .compact();
 
         Map<String, Object> body = new HashMap<>();

@@ -36,7 +36,17 @@ public class PropiedadMapper {
                 p.getFechaPublicacion() != null ? p.getFechaPublicacion().toString() : null,
                 p.getUsuario() != null ? p.getUsuario().getId() : null,
                 p.getAgencia() != null ? p.getAgencia().getId() : null,
-                imagenesDTO
+                imagenesDTO,
+                p.getTipo(),
+                p.getOperacion(),
+                p.getDistrito(),
+                p.getBarrio(),
+                p.getHabitaciones(),
+                p.getBanos(),
+                p.getParking(),
+                p.getAnoConstruccion(),
+                p.getEstado() != null ? p.getEstado().name() : null,
+                p.getCertificacionEnergetica() != null ? p.getCertificacionEnergetica().name() : null
         );
     }
 
@@ -53,6 +63,20 @@ public class PropiedadMapper {
         p.setCodigoPostal(dto.codigoPostal());
         p.setLatitud(dto.latitud());
         p.setLongitud(dto.longitud());
+        p.setTipo(dto.tipo());
+        p.setOperacion(dto.operacion());
+        p.setDistrito(dto.distrito());
+        p.setBarrio(dto.barrio());
+        p.setHabitaciones(dto.habitaciones());
+        p.setBanos(dto.banos());
+        p.setParking(dto.parking());
+        p.setAnoConstruccion(dto.anoConstruccion());
+        if (dto.estado() != null) {
+            p.setEstado(com.ryuunomi.inmotech.enums.EstadoPropiedad.valueOf(dto.estado()));
+        }
+        if (dto.certificacionEnergetica() != null) {
+            p.setCertificacionEnergetica(com.ryuunomi.inmotech.enums.CertificacionEnergetica.valueOf(dto.certificacionEnergetica()));
+        }
 
 
         if (dto.idUsuario() != null) {

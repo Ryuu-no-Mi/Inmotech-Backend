@@ -22,9 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email no encontrado"));
 
-        System.err.println("Login para email=" + email);
-        System.err.println("hash en BD=" + usuario.getContrasenia());
-
         // Mapea las capacidades del usuario a GrantedAuthority de Spring Security
         List<SimpleGrantedAuthority> authorities = usuario.getCapacidades().stream()
                 .map(capacidad -> new SimpleGrantedAuthority("ROLE_" + capacidad.name())) // ¡Importante el prefijo "ROLE_"!

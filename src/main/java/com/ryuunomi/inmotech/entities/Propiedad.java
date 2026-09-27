@@ -8,6 +8,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.ryuunomi.inmotech.enums.CertificacionEnergetica;
+import com.ryuunomi.inmotech.enums.EstadoPropiedad;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -76,8 +79,27 @@ public class Propiedad {
     @Column(nullable = false)
     private String provincia;
 
+    @Column(nullable = false)
+    private String tipo;
+
+    @NotBlank
+    @Column(nullable = false)
+    private String operacion;
+
     @Column(name = "codigo_postal")
     private String codigoPostal;
+
+    private String distrito;
+    private String barrio;
+
+    private Integer habitaciones;
+    private Integer banos;
+    private Boolean parking;
+    private Integer anoConstruccion;
+    @Enumerated(EnumType.STRING)
+    private EstadoPropiedad estado;
+    @Enumerated(EnumType.STRING)
+    private CertificacionEnergetica certificacionEnergetica;
 
     private Double latitud;
     private Double longitud;
@@ -120,7 +142,7 @@ public class Propiedad {
     public Propiedad() {
     }
 
-    public Propiedad(String titulo, String descripcion, BigDecimal precio, BigDecimal superficie, String direccion, String ciudad, String provincia, String codigoPostal, Double latitud, Double longitud, LocalDateTime fechaPublicacion, List<ImagenPropiedad> imagenes, ImagenPropiedad imagenPortada, Usuario usuario, Agencia agencia, List<Favorito> favoritos, List<Consulta> consultas) {
+    public Propiedad(String titulo, String descripcion, BigDecimal precio, BigDecimal superficie, String direccion, String ciudad, String provincia, String codigoPostal, Double latitud, Double longitud, LocalDateTime fechaPublicacion, List<ImagenPropiedad> imagenes, ImagenPropiedad imagenPortada, Usuario usuario, Agencia agencia, List<Favorito> favoritos, List<Consulta> consultas, String tipo, String operacion) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -138,6 +160,8 @@ public class Propiedad {
         this.agencia = agencia;
         this.favoritos = favoritos;
         this.consultas = consultas;
+        this.tipo = tipo;
+        this.operacion = operacion;
     }
 
     public Long getId() {return id;}
@@ -200,6 +224,22 @@ public class Propiedad {
         this.provincia = provincia;
     }
 
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getOperacion() {
+        return operacion;
+    }
+
+    public void setOperacion(String operacion) {
+        this.operacion = operacion;
+    }
+
     public String getCodigoPostal() {
         return codigoPostal;
     }
@@ -207,6 +247,30 @@ public class Propiedad {
     public void setCodigoPostal(String codigoPostal) {
         this.codigoPostal = codigoPostal;
     }
+
+    public String getDistrito() { return distrito; }
+    public void setDistrito(String distrito) { this.distrito = distrito; }
+
+    public String getBarrio() { return barrio; }
+    public void setBarrio(String barrio) { this.barrio = barrio; }
+
+    public Integer getHabitaciones() { return habitaciones; }
+    public void setHabitaciones(Integer habitaciones) { this.habitaciones = habitaciones; }
+
+    public Integer getBanos() { return banos; }
+    public void setBanos(Integer banos) { this.banos = banos; }
+
+    public Boolean getParking() { return parking; }
+    public void setParking(Boolean parking) { this.parking = parking; }
+
+    public Integer getAnoConstruccion() { return anoConstruccion; }
+    public void setAnoConstruccion(Integer anoConstruccion) { this.anoConstruccion = anoConstruccion; }
+
+    public EstadoPropiedad getEstado() { return estado; }
+    public void setEstado(EstadoPropiedad estado) { this.estado = estado; }
+
+    public CertificacionEnergetica getCertificacionEnergetica() { return certificacionEnergetica; }
+    public void setCertificacionEnergetica(CertificacionEnergetica certificacionEnergetica) { this.certificacionEnergetica = certificacionEnergetica; }
 
     public Double getLatitud() {
         return latitud;

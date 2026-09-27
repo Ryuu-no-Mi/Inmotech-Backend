@@ -27,12 +27,16 @@ import java.util.stream.Collectors;
 
 import io.jsonwebtoken.Jwts;
 
+import javax.crypto.SecretKey;
+
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final SecretKey secretKey;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, SecretKey secretKey) {
         this.authenticationManager = authenticationManager;
+        this.secretKey = secretKey;
         setFilterProcessesUrl("/api/auth/login"); // endpoint de login
     }
 
@@ -77,7 +81,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .setClaims(claims) // Usar los claims que incluyen los roles
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora
-                .signWith(TokenJwtConfig.SECRET_KEY)
+                .signWith(secretKey)
                 .compact();
 
         // Añadir el token al encabezado de la respuesta (opcional, pero buena práctica)

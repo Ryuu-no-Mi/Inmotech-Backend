@@ -1,11 +1,15 @@
 package com.ryuunomi.inmotech.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ryuunomi.inmotech.dto.BusquedaDTO;
+import com.ryuunomi.inmotech.dto.FacetaDTO;
 import com.ryuunomi.inmotech.dto.ImagenPropiedadDTO;
+import com.ryuunomi.inmotech.dto.PageResponse;
 import com.ryuunomi.inmotech.dto.PropiedadDTO;
 import com.ryuunomi.inmotech.entities.ImagenPropiedad;
 import com.ryuunomi.inmotech.entities.Propiedad;
 import com.ryuunomi.inmotech.entities.Usuario;
+import com.ryuunomi.inmotech.entities.Agencia;
 import com.ryuunomi.inmotech.enums.CapacidadUsuario;
 import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.mapper.ImagenMapper;
@@ -15,6 +19,8 @@ import com.ryuunomi.inmotech.services.propiedad.IPropiedadService;
 import com.ryuunomi.inmotech.services.suscripcion.ISuscripcionService;
 import com.ryuunomi.inmotech.services.suscripcion.SuscripcionLimitsDTO;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
+import com.ryuunomi.inmotech.services.agencia.IAgenciaService;
+import com.ryuunomi.inmotech.security.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,17 +55,70 @@ public class PropiedadController {
     @Autowired
     private ISuscripcionService suscripcionService;
 
+    @Autowired
+    private IAgenciaService agenciaService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
+
     // cualquier usuario pued eacceder este o no autenticado
     @GetMapping
-    public List<PropiedadDTO> list() {
-        List<Propiedad> entidades = propiedadService.findAll();
-        List<PropiedadDTO> dtos = new ArrayList<>();
+    public PageResponse<PropiedadDTO> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        org.springframework.data.domain.Page<Propiedad> pageResult =
+            propiedadService.findAllActivas(org.springframework.data.domain.PageRequest.of(page, size));
+        List<PropiedadDTO> dtos = pageResult.getContent().stream()
+            .map(PropiedadMapper::toDTO)
+            .toList();
+        return new PageResponse<>(dtos, pageResult.getNumber(), pageResult.getSize(),
+            pageResult.getTotalElements(), pageResult.getTotalPages(),
+            pageResult.isFirst(), pageResult.isLast());
+    }
 
-        for (Propiedad p : entidades) {
-            dtos.add(PropiedadMapper.toDTO(p));
-        }
+    @GetMapping("/buscar")
+    public PageResponse<PropiedadDTO> buscar(
+            @RequestParam(required = false) String operacion,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String ciudad,
+            @RequestParam(required = false) String provincia,
+            @RequestParam(required = false) List<String> tipos,
+            @RequestParam(required = false) String precioMin,
+            @RequestParam(required = false) String precioMax,
+            @RequestParam(required = false) String superficieMin,
+            @RequestParam(required = false) String superficieMax,
+            @RequestParam(required = false) String distrito,
+            @RequestParam(required = false) String barrio,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        BusquedaDTO dto = new BusquedaDTO(operacion, texto, ciudad, provincia, tipos, precioMin, precioMax, superficieMin, superficieMax, distrito, barrio);
+        org.springframework.data.domain.Page<Propiedad> pageResult =
+            propiedadService.buscarConFiltros(dto, org.springframework.data.domain.PageRequest.of(page, size));
+        List<PropiedadDTO> dtos = pageResult.getContent().stream()
+            .map(PropiedadMapper::toDTO)
+            .toList();
+        return new PageResponse<>(dtos, pageResult.getNumber(), pageResult.getSize(),
+            pageResult.getTotalElements(), pageResult.getTotalPages(),
+            pageResult.isFirst(), pageResult.isLast());
+    }
 
-        return dtos;
+    @GetMapping("/facetas")
+    public FacetaDTO facetas(
+            @RequestParam(required = false) String operacion,
+            @RequestParam(required = false) String ciudad,
+            @RequestParam(required = false) String provincia,
+            @RequestParam(required = false) List<String> tipos,
+            @RequestParam(required = false) String precioMin,
+            @RequestParam(required = false) String precioMax,
+            @RequestParam(required = false) String superficieMin,
+            @RequestParam(required = false) String superficieMax,
+            @RequestParam(required = false) String distrito,
+            @RequestParam(required = false) String barrio
+    ) {
+        BusquedaDTO dto = new BusquedaDTO(operacion, null, ciudad, provincia, tipos, precioMin, precioMax, superficieMin, superficieMax, distrito, barrio);
+        return propiedadService.getFacetas(dto);
     }
 
 
@@ -78,11 +137,10 @@ public class PropiedadController {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(@RequestBody PropiedadDTO dto) {
+    public ResponseEntity<?> create(@jakarta.validation.Valid @RequestBody PropiedadDTO dto,
+                                    Authentication authentication) {
         try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Usuario usuario = usuarioService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            Usuario usuario = authorizationService.requireCurrentUser(authentication);
 
             if (!suscripcionService.puedePublicar(usuario)) {
                 SuscripcionLimitsDTO limites = suscripcionService.obtenerLimites(usuario);
@@ -97,6 +155,20 @@ public class PropiedadController {
             }
 
             Propiedad propiedad = PropiedadMapper.fromDTO(dto);
+            propiedad.setUsuario(usuario);
+            if (dto.idAgencia() != null) {
+                Agencia agencia = agenciaService.findById(dto.idAgencia())
+                        .orElseThrow(() -> new ResourceNotFoundException("Agencia no encontrada"));
+                if (!authorizationService.isGlobalAdmin(usuario)
+                        && (usuario.getAgencia() == null
+                        || !usuario.getAgencia().getId().equals(agencia.getId()))) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("No tienes permiso para publicar en esta agencia");
+                }
+                propiedad.setAgencia(agencia);
+            } else {
+                propiedad.setAgencia(null);
+            }
             Propiedad guardada = propiedadService.save(propiedad);
             return ResponseEntity.status(HttpStatus.CREATED).body(PropiedadMapper.toDTO(guardada));
         } catch (Exception e) {
@@ -105,10 +177,18 @@ public class PropiedadController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
+    @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PostMapping(value = "/{id}/imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> subirImagenes(@PathVariable Long id, @RequestPart("files") MultipartFile[] files) {
+    public ResponseEntity<?> subirImagenes(@PathVariable Long id,
+                                           @RequestPart("files") MultipartFile[] files,
+                                           Authentication authentication) {
         try {
+            Usuario actor = authorizationService.requireCurrentUser(authentication);
+            Propiedad propiedad = propiedadService.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada"));
+            if (!authorizationService.canManageProperty(actor, propiedad)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso sobre esta propiedad");
+            }
             List<ImagenPropiedad> imagenes = imagenPropiedadService.subirImagenes(id, files);
             return ResponseEntity.ok(imagenes);
         } catch (Exception e) {
@@ -119,17 +199,11 @@ public class PropiedadController {
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody PropiedadDTO propiedadDTO) {
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @jakarta.validation.Valid @RequestBody PropiedadDTO propiedadDTO,
+                                    Authentication authentication) {
 
-        //verifico que el usuario atentificado se el creador de la propiedad
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        Optional<Usuario> usuarioOptional = usuarioService.findByEmail(email);
-        if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Usuario usuarioAutenticado = usuarioOptional.get();
+        Usuario usuarioAutenticado = authorizationService.requireCurrentUser(authentication);
 
         Optional<Propiedad> propiedadOptional = propiedadService.findById(id);
         if (propiedadOptional.isEmpty()){
@@ -139,50 +213,37 @@ public class PropiedadController {
         Propiedad propiedad = propiedadOptional.get();
 
 
-        //El usuario solo puede modificar los pisos creados por el
-        boolean esDuenio = propiedad.getUsuario() != null
-                && propiedad.getUsuario().getEmail().equals(email);
-
-        // los de idAgencia (pueden ser null)
-        Long idAgenciaPropiedad = propiedad.getAgencia() != null
-                ? propiedad.getAgencia().getId() : null;
-        Long idAgenciaUsuario = usuarioAutenticado.getAgencia() != null
-                ? usuarioAutenticado.getAgencia().getId() : null;
-
-        /*
-        boolean mismaAgencia = propiedad.getAgencia().getId().equals(
-                usuarioAutenticado.getAgencia() != null ? usuarioAutenticado.getAgencia().getId() : null);
-         */
-
-        boolean esEnMiAgencia = idAgenciaPropiedad != null
-                && idAgenciaPropiedad.equals(idAgenciaUsuario);
-
-        boolean puedeModificar =
-                (usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.USUARIO) && esDuenio)
-                        || ((usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.AGENTE)
-                        || usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.ADMIN))
-                        && esEnMiAgencia);
-
-        if (!puedeModificar) {
+        if (!authorizationService.canManageProperty(usuarioAutenticado, propiedad)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("No tienes permiso para modificar esta propiedad");
         }
 
-        Propiedad actualizada = propiedadService.update(id, PropiedadMapper.fromDTO(propiedadDTO));
+        Propiedad cambios = PropiedadMapper.fromDTO(propiedadDTO);
+        cambios.setUsuario(propiedad.getUsuario());
+        if (propiedadDTO.idAgencia() != null) {
+            Agencia agenciaDestino = agenciaService.findById(propiedadDTO.idAgencia())
+                    .orElseThrow(() -> new ResourceNotFoundException("Agencia no encontrada"));
+            if (!authorizationService.isGlobalAdmin(usuarioAutenticado)
+                    && (usuarioAutenticado.getAgencia() == null
+                    || !usuarioAutenticado.getAgencia().getId().equals(agenciaDestino.getId()))) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No tienes permiso para asignar esta agencia");
+            }
+            cambios.setAgencia(agenciaDestino);
+        } else if (usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.AGENTE)) {
+            cambios.setAgencia(propiedad.getAgencia());
+        }
+
+        Propiedad actualizada = propiedadService.update(id, cambios);
         return ResponseEntity.ok(PropiedadMapper.toDTO(actualizada));
     }
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id, Authentication authentication) {
 
         //verifico que el usuario atentificado se el creador de la propiedad
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        Optional<Usuario> usuarioOptional = usuarioService.findByEmail(email);
-        if (usuarioOptional.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        Usuario usuarioAutenticado = usuarioOptional.get();
+        Usuario usuarioAutenticado = authorizationService.requireCurrentUser(authentication);
 
         Optional<Propiedad> propiedadOptional = propiedadService.findById(id);
         if (propiedadOptional.isEmpty()) {
@@ -190,47 +251,54 @@ public class PropiedadController {
         }
         Propiedad propiedad = propiedadOptional.get();
 
-        // podria crear un metodo de verificacion
-        boolean esDuenio = propiedad.getUsuario().getEmail().equals(email);
-        boolean tieneAdmin = usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.ADMIN);
-        boolean mismaAgencia = propiedad.getAgencia().getId().equals(
-                usuarioAutenticado.getAgencia() != null ? usuarioAutenticado.getAgencia().getId() : null);
-
-        if ((usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.USUARIO) ||
-                usuarioAutenticado.getCapacidades().contains(CapacidadUsuario.AGENTE)) && esDuenio) {
+        if (authorizationService.canManageProperty(usuarioAutenticado, propiedad)) {
             propiedadService.deleteById(id);
             return ResponseEntity.ok("Propiedad eliminada");
-        } else if (tieneAdmin && mismaAgencia) {
-            propiedadService.deleteById(id);
-            return ResponseEntity.ok("Propiedad eliminada");
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar esta propiedad");
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar esta propiedad");
     }
 
 
     @PreAuthorize("hasAnyRole('ADMIN','AGENTE')")
     @GetMapping("/user/{idUsuario}")
-    public List<PropiedadDTO> listByUser(@PathVariable Long idUsuario) {
+    public ResponseEntity<?> listByUser(@PathVariable Long idUsuario, Authentication authentication) {
+            Usuario actor = authorizationService.requireCurrentUser(authentication);
+            Usuario target = usuarioService.findById(idUsuario)
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+            boolean sameAgency = actor.getAgencia() != null && target.getAgencia() != null
+                    && actor.getAgencia().getId().equals(target.getAgencia().getId());
+            if (!authorizationService.isGlobalAdmin(actor)
+                    && !(actor.getCapacidades().contains(CapacidadUsuario.AGENTE) && sameAgency)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para consultar estas propiedades");
+            }
             List<Propiedad> propiedades = propiedadService.findByUsuarioId(idUsuario);
             List<PropiedadDTO> dtos = new ArrayList<>();
             for (Propiedad p : propiedades) {
                 dtos.add(PropiedadMapper.toDTO(p));
             }
-            return dtos;
+            return ResponseEntity.ok(dtos);
     }
 
 
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @GetMapping("/agency/{idAgencia}")
-    public List<PropiedadDTO> listByAgency(@PathVariable Long idAgencia) {
+    public ResponseEntity<?> listByAgency(@PathVariable Long idAgencia, Authentication authentication) {
+        Usuario actor = authorizationService.requireCurrentUser(authentication);
+        Agencia agencia = agenciaService.findById(idAgencia)
+                .orElseThrow(() -> new ResourceNotFoundException("Agencia no encontrada"));
+        boolean sameAgency = actor.getAgencia() != null
+                && actor.getAgencia().getId().equals(agencia.getId());
+        if (!authorizationService.isGlobalAdmin(actor)
+                && !(actor.getCapacidades().contains(CapacidadUsuario.AGENTE) && sameAgency)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para consultar esta agencia");
+        }
         //return propiedadService.findByAgenciaId(idAgencia);
         List<Propiedad> propiedades = propiedadService.findByAgenciaId(idAgencia);
         List<PropiedadDTO> dtos = new ArrayList<>();
         for (Propiedad p : propiedades) {
             dtos.add(PropiedadMapper.toDTO(p));
         }
-        return dtos;
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/myProperties")

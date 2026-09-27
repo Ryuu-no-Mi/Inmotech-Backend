@@ -23,6 +23,9 @@ public class Plan {
     @Column(name = "max_propiedades_agencia", nullable = false)
     private int maxPropiedadesAgencia = 4;
 
+    @Column(name = "max_agentes", nullable = false)
+    private int maxAgentes = 5;
+
     @Column(name = "precio_mensual")
     private BigDecimal precioMensual;
 
@@ -31,10 +34,11 @@ public class Plan {
 
     public Plan() {}
 
-    public Plan(String nombre, int maxPropiedadesUsuario, int maxPropiedadesAgencia, BigDecimal precioMensual) {
+    public Plan(String nombre, int maxPropiedadesUsuario, int maxPropiedadesAgencia, int maxAgentes, BigDecimal precioMensual) {
         this.nombre = nombre;
         this.maxPropiedadesUsuario = maxPropiedadesUsuario;
         this.maxPropiedadesAgencia = maxPropiedadesAgencia;
+        this.maxAgentes = maxAgentes;
         this.precioMensual = precioMensual;
     }
 
@@ -49,6 +53,9 @@ public class Plan {
 
     public int getMaxPropiedadesAgencia() { return maxPropiedadesAgencia; }
     public void setMaxPropiedadesAgencia(int maxPropiedadesAgencia) { this.maxPropiedadesAgencia = maxPropiedadesAgencia; }
+
+    public int getMaxAgentes() { return maxAgentes; }
+    public void setMaxAgentes(int maxAgentes) { this.maxAgentes = maxAgentes; }
 
     public BigDecimal getPrecioMensual() { return precioMensual; }
     public void setPrecioMensual(BigDecimal precioMensual) { this.precioMensual = precioMensual; }

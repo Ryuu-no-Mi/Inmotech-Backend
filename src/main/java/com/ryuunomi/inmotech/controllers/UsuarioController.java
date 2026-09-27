@@ -3,15 +3,15 @@ package com.ryuunomi.inmotech.controllers;
 import com.ryuunomi.inmotech.dto.UsuarioDTO;
 import com.ryuunomi.inmotech.dto.UsuarioRegistroDTO;
 import com.ryuunomi.inmotech.entities.Usuario;
-import com.ryuunomi.inmotech.exceptions.ResourceNotFoundException;
 import com.ryuunomi.inmotech.mapper.UsuarioMapper;
 import com.ryuunomi.inmotech.mapper.UsuarioRegistroMapper;
-import com.ryuunomi.inmotech.security.util.JwtUtils;
+import com.ryuunomi.inmotech.security.AuthorizationService;
 import com.ryuunomi.inmotech.services.usuario.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -31,13 +31,17 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost:5173") // dirección del frontend react
+    @CrossOrigin(origins = "http://localhost:5173") // dirección del frontend react
 public class UsuarioController {
 
     @Autowired
     private IUsuarioService usuarioService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     // Listar todos los usuarios
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<UsuarioDTO> list() {
         /*
@@ -55,8 +59,13 @@ public class UsuarioController {
     }
 
     // Listar por id
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<?> listById(@PathVariable Long id) {
+        Usuario actor = authorizationService.requireCurrentUser(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+        if (!authorizationService.canManageUser(actor, id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para consultar este usuario");
+        }
         Optional<Usuario> usuario = usuarioService.findById(id);
         if (usuario.isEmpty()) {
             return  ResponseEntity.notFound().build();
@@ -66,7 +75,7 @@ public class UsuarioController {
 
     // Registro público de usuario (sin autenticación previa)
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+    public ResponseEntity<UsuarioDTO> register(@jakarta.validation.Valid @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
         //Usuario usuarioEntidad = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
         Usuario usuarioCreado = usuarioService.registerNewUser(usuarioRegistroDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(usuarioCreado));
@@ -75,7 +84,7 @@ public class UsuarioController {
     // Crear usuario (un admin, crea un agente
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+    public ResponseEntity<UsuarioDTO> create(@jakarta.validation.Valid @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
         Usuario usuarioCreado = usuarioService.createUserByAdmin(usuarioRegistroDTO); // Asigna roles AGENTE/ADMIN
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioMapper.toDTO(usuarioCreado));
     }
@@ -83,7 +92,11 @@ public class UsuarioController {
     // Actualizar un usuario existente
     @PreAuthorize("hasAnyRole('USUARIO','ADMIN','AGENTE')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+    public ResponseEntity<?> update(@PathVariable Long id, @jakarta.validation.Valid @RequestBody UsuarioRegistroDTO usuarioRegistroDTO) {
+        Usuario actor = authorizationService.requireCurrentUser(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+        if (!authorizationService.canManageUser(actor, id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar este usuario");
+        }
         if (usuarioService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -91,13 +104,16 @@ public class UsuarioController {
         Usuario entidad = UsuarioRegistroMapper.fromRegisterDTO(usuarioRegistroDTO);
         entidad.setId(id);
         entidad.setImagen(null);
-        System.err.println("password codeada::: " + entidad.getContrasenia());
+        if (!authorizationService.isGlobalAdmin(actor)) {
+            entidad.setAgencia(null);
+        }
         Usuario guardado = usuarioService.updateUser(id, entidad);
         UsuarioDTO responseDto = UsuarioMapper.toDTO(guardado);
         return ResponseEntity.ok(responseDto);
     }
 
     // Eliminar un usuario por email
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/email/{email}")
     public ResponseEntity<?> deleteByEmail(@PathVariable String email) {
         if (!usuarioService.existsByEmail(email)) {
@@ -108,8 +124,13 @@ public class UsuarioController {
     }
 
     // Eliminar un usuario por ID
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        Usuario actor = authorizationService.requireCurrentUser(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+        if (!authorizationService.canManageUser(actor, id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         if (usuarioService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -118,11 +139,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UsuarioDTO> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String email = JwtUtils.getEmailFromToken(token); // Decodifica el token
-        Usuario usuario = usuarioService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UsuarioDTO> getCurrentUser(Authentication authentication) {
+        Usuario usuario = authorizationService.requireCurrentUser(authentication);
         return ResponseEntity.ok(UsuarioMapper.toDTO(usuario));
     }
 

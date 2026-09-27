@@ -19,11 +19,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
 
+import javax.crypto.SecretKey;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,11 +41,20 @@ public class SecurityConfig {
 
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+        private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+        private final SecretKey jwtSecretKey;
+        private final String allowedOrigins;
 
         public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
-                              OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler) {
+                              OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler,
+                              org.springframework.security.core.userdetails.UserDetailsService userDetailsService,
+                              SecretKey jwtSecretKey,
+                              @Value("${app.cors.allowed-origins:http://localhost:5173}") String allowedOrigins) {
             this.customOAuth2UserService = customOAuth2UserService;
             this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+            this.userDetailsService = userDetailsService;
+            this.jwtSecretKey = jwtSecretKey;
+            this.allowedOrigins = allowedOrigins;
         }
 
         @Bean
@@ -63,16 +74,17 @@ public class SecurityConfig {
                     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .authorizeHttpRequests(authz -> authz
-                            .requestMatchers("/oauth2/**", "/login/**").permitAll()
-                            .requestMatchers("/api/auth/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
-                            .requestMatchers("/api/user", "/api/user/**").permitAll()
-                            .requestMatchers("/api/favourite", "/api/favourite/**").permitAll()
-                            .requestMatchers("/api/property/**", "/api/agency/**", "/api/imageProperty/**", "/api/imageUser/**").permitAll()
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                            .requestMatchers("/oauth2/**", "/login/**", "/api/auth/login", "/api/user/register").permitAll()
+                            .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/buscar", "/api/property/facetas", "/api/property/*").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/*").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/imageProperty/**").permitAll()
                             .requestMatchers("/imagenesPropiedades/**").permitAll()
                             .requestMatchers("/imagenesUsuarios/**").permitAll()
                             .requestMatchers("/imagenes/**").permitAll()
-                            .requestMatchers("/api/**").authenticated()
+                            .anyRequest().authenticated()
                     )
                     .exceptionHandling(ex -> ex
                             .authenticationEntryPoint((request, response, authException) -> {
@@ -88,17 +100,20 @@ public class SecurityConfig {
                             .successHandler(oAuth2SuccessHandler)
                     )
                     // Filtros JWT: autenticacion primero, luego validacion
-                    .addFilter(new JwtAuthenticationFilter(authManager))
-                    .addFilterBefore(new JwtValidationFilter(), UsernamePasswordAuthenticationFilter.class)
+                    .addFilter(new JwtAuthenticationFilter(authManager, jwtSecretKey))
+                    .addFilterBefore(new JwtValidationFilter(jwtSecretKey, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                     .build();
         }
 
         @Bean
         CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOriginPatterns(List.of("*"));
+            config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(origin -> !origin.isBlank())
+                    .toList());
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","OPTIONS"));
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Stripe-Signature"));
             config.setAllowCredentials(true);
 
             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

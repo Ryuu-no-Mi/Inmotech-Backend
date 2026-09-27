@@ -2,6 +2,8 @@ package com.ryuunomi.inmotech.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+
+import java.time.LocalDate;
     /**
      *   `id` INT AUTO_INCREMENT PRIMARY KEY,
      *   `nombre` VARCHAR(255) NOT NULL,
@@ -32,6 +34,9 @@ public class Agencia {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_plan")
     private Plan plan;
+
+    @Column(name = "fecha_expiracion_plan")
+    private LocalDate fechaExpiracionPlan;
 
     public Agencia() {
     }
@@ -68,6 +73,9 @@ public class Agencia {
 
     public Plan getPlan() { return plan; }
     public void setPlan(Plan plan) { this.plan = plan; }
+
+    public LocalDate getFechaExpiracionPlan() { return fechaExpiracionPlan; }
+    public void setFechaExpiracionPlan(LocalDate fechaExpiracionPlan) { this.fechaExpiracionPlan = fechaExpiracionPlan; }
 
     public @NotBlank String getNombre() {
         return nombre;

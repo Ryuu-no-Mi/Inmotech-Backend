@@ -132,7 +132,11 @@ public class StripeController {
             }
             case "invoice.payment_failed" -> {
                 Invoice invoice = (Invoice) object;
-                deactivateOrIgnore(findUserIdBySubscription(invoice.getSubscription()));
+                String subscriptionId = invoice.getParent() != null
+                        && invoice.getParent().getSubscriptionDetails() != null
+                        ? invoice.getParent().getSubscriptionDetails().getSubscription()
+                        : null;
+                deactivateOrIgnore(findUserIdBySubscription(subscriptionId));
             }
             default -> {
                 // Eventos no relacionados con el estado local se marcan como recibidos.

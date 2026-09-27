@@ -90,7 +90,7 @@ public class DataSeeder implements CommandLineRunner {
         listaMunicipios = MapaGeograficoEstatico.getAllMunicipios();
         System.out.println("=== DATA SEEDER: Mapa geografico cargado con " + listaMunicipios.size() + " municipios ===");
 
-        System.out.println("=== DATA SEEDER: Creando 30.000+ propiedades de prueba ===");
+        System.out.println("=== DATA SEEDER: Creando datos demo ===");
 
         Plan gratuitoPlan = planRepository.save(new Plan("Gratuito", 2, 4, 1, BigDecimal.ZERO));
         Plan premiumPlan = planRepository.save(new Plan("Premium", Integer.MAX_VALUE, Integer.MAX_VALUE, 1, new BigDecimal("9.99")));
@@ -113,12 +113,12 @@ public class DataSeeder implements CommandLineRunner {
 
         long startTime = System.currentTimeMillis();
 
-        crearUsuariosNormales(premiumPlan);
+        int propsUsuariosNormales = crearUsuariosNormales(premiumPlan);
 
         int totalAgencias = 15;
         int agentesPorAgenciaPremium = 5;
         int agentesPorAgenciaBasic = 3;
-        int propsPorAgente = 40;
+        int propsPorAgente = 4;
 
         int totalPropsAgencias = (10 * agentesPorAgenciaPremium + 5 * agentesPorAgenciaBasic) * propsPorAgente;
 
@@ -228,20 +228,20 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("=== DATA SEEDER: Datos de prueba creados ===");
         System.out.println("Admin: admin@inmotech.com / 123456");
         System.out.println("Usuarios normales:");
-        System.out.println("  gratuito@inmotech.com / 123456 (Gratuito, ~55 props)");
-        System.out.println("  premium@inmotech.com / 123456 (Premium, ~50 props, activas)");
-        System.out.println("  expira-hoy@inmotech.com / 123456 (Premium, ~48 props, inactivas)");
-        System.out.println("  expirado-ayer@inmotech.com / 123456 (Premium, ~47 props, inactivas)");
+        System.out.println("  gratuito@inmotech.com / 123456 (Gratuito, ~10 props)");
+        System.out.println("  premium@inmotech.com / 123456 (Premium, ~8 props, activas)");
+        System.out.println("  expira-hoy@inmotech.com / 123456 (Premium, ~6 props, inactivas)");
+        System.out.println("  expirado-ayer@inmotech.com / 123456 (Premium, ~6 props, inactivas)");
         System.out.println("15 Agencias (10 Premium, 5 Basic)");
         System.out.println("  Agentes Premium: " + (10 * agentesPorAgenciaPremium) + " | Agentes Basic: " + (5 * agentesPorAgenciaBasic));
         System.out.println("  Agencias con props inactivas: " + agenciasInactivas.size());
         System.out.println("  Agentes con suscripcion inactiva: " + agentesInactivos.size());
-        System.out.println("Total propiedades: " + propsCreadas + " (activas) + " + propsInactivas + " (inactivas) = " + (propsCreadas + propsInactivas));
+        System.out.println("Total propiedades: " + propsUsuariosNormales + " usuarios + " + propsCreadas + " activas + " + propsInactivas + " inactivas = " + (propsUsuariosNormales + propsCreadas + propsInactivas));
         System.out.println("Tiempo total: " + totalTime + "ms (" + (totalTime / 1000) + "s)");
     }
 
-    private void crearUsuariosNormales(Plan premiumPlan) {
-        int[] propsCounts = {55, 50, 48, 47};
+    private int crearUsuariosNormales(Plan premiumPlan) {
+        int[] propsCounts = {10, 8, 6, 6};
         String[][] usuariosData = {
             {"Gratuito", "gratuito", "GRATIS", "0"},
             {"Premium", "premium", "PREMIUM", String.valueOf(random.nextInt(365) + 30)},
@@ -249,6 +249,7 @@ public class DataSeeder implements CommandLineRunner {
             {"ExpiradoAyer", "expirado-ayer", "PREMIUM", String.valueOf(-random.nextInt(2) - 1)}
         };
 
+        int totalPropiedades = 0;
         for (int i = 0; i < usuariosData.length; i++) {
             String[] data = usuariosData[i];
             int propCount = propsCounts[i];
@@ -281,8 +282,9 @@ public class DataSeeder implements CommandLineRunner {
             usuario.setCapacidades(Set.of(CapacidadUsuario.USUARIO));
             usuario = usuarioRepository.save(usuario);
 
-            crearPropiedadesBatch(List.of(usuario), propCount, propCount);
+            totalPropiedades += crearPropiedadesBatch(List.of(usuario), propCount, propCount);
         }
+        return totalPropiedades;
     }
 
     private int crearPropiedadesBatch(List<Usuario> usuarios, int propsPorUsuario, int batchSize) {

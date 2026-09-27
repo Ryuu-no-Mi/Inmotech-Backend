@@ -76,9 +76,10 @@ public class SecurityConfig {
                     .authorizeHttpRequests(authz -> authz
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers("/oauth2/**", "/login/**", "/api/auth/login", "/api/user/register").permitAll()
-                            .requestMatchers("/actuator/health").permitAll()
-                            .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/buscar", "/api/property/facetas", "/api/property/*").permitAll()
+                             .requestMatchers("/actuator/health").permitAll()
+                             .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/property/myProperties", "/api/property/user/**", "/api/property/agency/**").authenticated()
+                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/*").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/imageProperty/**").permitAll()
                             .requestMatchers("/imagenesPropiedades/**").permitAll()

@@ -74,17 +74,23 @@ public class SecurityConfig {
                     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .authorizeHttpRequests(authz -> authz
+                            // 1. Peticiones OPTIONS (CORS preflight) siempre permitidas
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                            .requestMatchers("/oauth2/**", "/login/**", "/api/auth/login", "/api/user/register").permitAll()
-                             .requestMatchers("/actuator/health").permitAll()
-                             .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+
+                            // 2. Auth, OAuth2, Health check y Webhooks
+                            .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**", "/api/user/register").permitAll()
+                            .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
+
+                            // 3. Subrutas especificas de propiedades que SI requieren autenticación
                             .requestMatchers(HttpMethod.GET, "/api/property/myProperties", "/api/property/user/**", "/api/property/agency/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/*").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/imageProperty/**").permitAll()
-                            .requestMatchers("/imagenesPropiedades/**").permitAll()
-                            .requestMatchers("/imagenesUsuarios/**").permitAll()
-                            .requestMatchers("/imagenes/**").permitAll()
+
+                            // 4. Lectura pública general de propiedades, agencias e imágenes
+                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/*", "/api/property/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/*", "/api/agency/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/imageProperty/**", "/imagenesPropiedades/**", "/imagenesUsuarios/**", "/imagenes/**").permitAll()
+
+                            // 5. Cualquier otra ruta requiere autenticación
                             .anyRequest().authenticated()
                     )
                     .exceptionHandling(ex -> ex
@@ -100,8 +106,7 @@ public class SecurityConfig {
                             )
                             .successHandler(oAuth2SuccessHandler)
                     )
-                    // Filtros JWT: autenticacion primero, luego validacion
-                    .addFilter(new JwtAuthenticationFilter(authManager, jwtSecretKey))
+                    // Registrar solo el filtro de validación antes de UsernamePasswordAuthenticationFilter
                     .addFilterBefore(new JwtValidationFilter(jwtSecretKey, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                     .build();
         }
@@ -113,9 +118,10 @@ public class SecurityConfig {
                     .map(String::trim)
                     .filter(origin -> !origin.isBlank())
                     .toList());
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","OPTIONS"));
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Stripe-Signature"));
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Stripe-Signature", "X-Requested-With", "Accept", "Origin"));
+            config.setExposedHeaders(List.of("Authorization"));
             config.setAllowCredentials(true);
+            config.setMaxAge(3600L);
 
             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
             source.registerCorsConfiguration("/**", config);

@@ -82,15 +82,26 @@ public class SecurityConfig {
                             .requestMatchers("/actuator/health").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
 
-                            // 3. Subrutas especificas de propiedades que SI requieren autenticación
-                            .requestMatchers(HttpMethod.GET, "/api/property/myProperties", "/api/property/user/**", "/api/property/agency/**").authenticated()
+                            // 3. Endpoints específicos públicos de propiedades (ORDEN IMPORTA: PRIMERO PERMITALL DE ENDPOINTS PÚBLICOS DE PROPIEDAD)
+                            .requestMatchers(HttpMethod.GET,
+                                    "/api/property",
+                                    "/api/property/buscar",
+                                    "/api/property/facetas",
+                                    "/api/property/{id:[0-9]+}"
+                            ).permitAll()
 
-                            // 4. Lectura pública general de propiedades, agencias e imágenes
-                            .requestMatchers(HttpMethod.GET, "/api/property", "/api/property/*", "/api/property/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/*", "/api/agency/**").permitAll()
+                            // 4. Subrutas privadas de propiedades que SÍ requieren autenticación
+                            .requestMatchers(HttpMethod.GET,
+                                    "/api/property/myProperties",
+                                    "/api/property/user/**",
+                                    "/api/property/agency/**"
+                            ).authenticated()
+
+                            // 5. Lectura pública general de agencias e imágenes
+                            .requestMatchers(HttpMethod.GET, "/api/agency", "/api/agency/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/imageProperty/**", "/imagenesPropiedades/**", "/imagenesUsuarios/**", "/imagenes/**").permitAll()
 
-                            // 5. Cualquier otra ruta requiere autenticación
+                            // 6. Cualquier otra ruta requiere autenticación
                             .anyRequest().authenticated()
                     )
                     .exceptionHandling(ex -> ex
